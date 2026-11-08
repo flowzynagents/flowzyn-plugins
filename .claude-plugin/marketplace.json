@@ -1,0 +1,12 @@
+{
+  "name": "flowzyn",
+  "description": "Flowzyn agents for trades shops",
+  "owner": { "name": "Flowzyn", "email": "matt@flowzyn.com" },
+  "plugins": [
+    {
+      "name": "flowzyn",
+      "source": "./plugins/flowzyn",
+      "description": "Flowzyn agents: win the work, run the office, keep the customers. Needs a Flowzyn licence."
+    }
+  ]
+}
