@@ -56,7 +56,10 @@ If a "Flowzyn morning run" task already exists, keep it and don't make a second 
 
 If scheduled tasks aren't available on their plan, say they need Claude Pro or higher and stop here.
 
-## 7. First run and finish
+## 7. The app
+Use the install-app skill to put the Flowzyn agents app in their account.
+
+## 8. First run and finish
 Run the Flowzyn morning run now, straight away, with the morning-run skill. Don't ask first. It only drafts, nothing goes to a customer without the owner's OK.
 
 Then tell the owner, in three lines: which apps Flowzyn is using, which agents are now on (and any waiting on an app, with the app), and that the next morning run is tomorrow at 6:30 am.

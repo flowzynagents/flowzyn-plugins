@@ -1,0 +1,31 @@
+{
+  "db": { "rules": [
+    { "path": "", "read": "interact", "write": "admin" },
+    { "path": "setup", "write": "interact" },
+    { "path": "tasks", "write": "interact" },
+    { "path": "pipeline", "write": "interact" },
+    { "path": "exceptions", "write": "interact" },
+    { "path": "settings/goals", "write": "interact" },
+    { "path": "settings/profile", "write": "interact" },
+    { "path": "settings/pricebook", "write": "interact" },
+    { "path": "settings/schedule", "write": "interact" },
+    { "path": "settings/budget", "write": "interact" },
+    { "path": "settings/autoapprove", "write": "interact" },
+    { "path": "settings/templates", "write": "interact" },
+    { "path": "settings/template-lost-quote-revival", "write": "interact" },
+    { "path": "campaigns", "write": "interact" },
+    { "path": "bills", "write": "interact" },
+    { "path": "activity", "write": "interact" }
+  ] },
+  "mcp": { "servers": [
+    { "server": "Jobber", "tools": ["search_quotes", "get_quote", "search_jobs", "get_job", "search_invoices", "search_visits", "search_requests", "get_request", "search_clients", "get_client", "search_properties", "search_products_and_services", "create_request", "create_quote"] },
+    { "server": "Flowzyn", "tools": ["flowzyn_status", "get_agent_instructions"] },
+    { "server": "flowzyn", "tools": ["flowzyn_status", "get_agent_instructions"] },
+    { "server": "Intuit QuickBooks", "tools": ["company_info"] },
+    { "server": "Xero", "tools": ["get_organisation_info"] },
+    { "server": "Gmail", "tools": ["search_threads", "search_messages"] },
+    { "server": "Microsoft 365", "tools": ["outlook_email_search"] }
+  ] },
+  "sample": { "images": true },
+  "user": {}
+}
