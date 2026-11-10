@@ -1,6 +1,6 @@
 {
   "name": "flowzyn",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Flowzyn agents for trades shops. Uses the shop's own Jobber, QuickBooks or Xero, and Gmail or Outlook connectors. Needs a Flowzyn licence.",
   "author": { "name": "Flowzyn", "email": "matt@flowzyn.com", "url": "https://www.flowzyn.com" },
   "homepage": "https://www.flowzyn.com"
