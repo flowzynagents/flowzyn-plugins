@@ -1,6 +1,6 @@
 ---
 name: install-app
-description: Use from Set up Flowzyn, from the morning run, or when the owner says "Update my Flowzyn app": puts the Flowzyn agents app in the owner's own Claude, or updates it to the latest version.
+description: Use from Set up Flowzyn, from the morning run, or when the owner says "Update my Flowzyn app". Puts the Flowzyn agents app in the owner's own Claude, or updates it to the latest version.
 ---
 
 # Install or update the Flowzyn agents app
