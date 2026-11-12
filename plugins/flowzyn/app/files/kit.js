@@ -89,7 +89,7 @@
       o.sub ? h('p', { class: 'ag-sub' }, o.sub) : null,
       o.viz || null);
     const did = (o.did && o.did.length) ? h('div', { class: 'ag-did' },
-      h('p', { class: 'ag-eyebrow', style: 'color:var(--muted)' }, o.didTitle || 'What it did today'),
+      h('p', { class: 'ag-eyebrow', style: 'color:var(--muted)' }, o.didTitle || 'What it found just now'),
       h('ol', { class: 'ag-tl' }, o.did.map((d) => h('li', { class: d.done === false ? '' : 'done' }, d.t, d.s ? h('small', null, d.s) : null)))) : null;
     const box = h('section', { class: 'ag-hero' }, viz, did);
     if (!did) box.style.gridTemplateColumns = '1fr';
@@ -187,8 +187,8 @@
       acts.length ? h('div', { class: 'ag-act' }, ...acts) : null,
       slot);
   };
-  // What it checked today (for quiet weeks): lines of plain facts from the data.
-  K.checked = (h, title, lines) => h('div', null, h('p', { class: 'ag-eyebrow' }, 'What it checked today'), h('h3', { class: 'ag-title' }, title), h('ul', { class: 'ag-check' }, lines.filter(Boolean).map((l) => h('li', null, l))));
+  // What it checked just now (for quiet weeks): lines of plain facts from the data.
+  K.checked = (h, title, lines) => h('div', null, h('p', { class: 'ag-eyebrow' }, 'What it checked just now'), h('h3', { class: 'ag-title' }, title), h('ul', { class: 'ag-check' }, lines.filter(Boolean).map((l) => h('li', null, l))));
   // Example panel: always labelled.
   // No made up data anywhere (Matt, Nov 10): examples are switched off.
   K.example = () => null;

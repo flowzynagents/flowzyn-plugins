@@ -53,7 +53,7 @@ FZ.board('yes-to-install', {
 
     // The shop orders from one supplier. Name comes from the QuickBooks bills, email is set once here.
     const sup = Object.assign({ name: '', email: '' }, FZ.profile().supplier || {});
-    const named = !!sup.name; if (!named) sup.name = 'your glass supplier';
+    const named = !!sup.name; if (!named) sup.name = 'your supplier';
     // The supplier's order email comes from Jobber: the supplier kept as a client there.
     if (!sup.email && named) {
       try {
@@ -98,7 +98,7 @@ FZ.board('yes-to-install', {
     if (!rows.length) {
       const st = ui.status(['Every yes is booked. ', { b: 'Nothing waiting to go on the schedule.' }]);
       st.classList.add('yi-good');
-      out.push(st, K.how(h, 'It turns every yes into a booked job inside a week, with the glass order to ' + sup.name + ' written for you.'));
+      out.push(st, K.how(h, 'It turns every yes into a booked job inside a week, with the order to ' + sup.name + ' written for you.'));
       const ex = [['Lakeview Condo', 4850, 11], ['Bluebird Cabin', 3200, 6], ['Main Street Salon', 1900, 3], ['Pine Ridge HOA', 2600, 1]].map(([who, total, days]) => ({ who, total, days }));
       out.push(K.quiet(h,
         K.checked(h, 'Approved quotes checked in Jobber', ['No approved quote waiting to be booked', 'No job without a visit date', booked.length ? fmt.plural(booked.length, 'yes', 'yeses') + ' turned into jobs in the last 90 days' : null]),
@@ -111,7 +111,7 @@ FZ.board('yes-to-install', {
     out.push(ui.status(late.length
       ? [short(total) + ' in yeses not booked yet. ', { b: short(lateD) + ' has waited over a week.' }]
       : [short(total) + ' in yeses not booked yet. ', { b: 'All inside a week.' }]));
-    out.push(K.how(h, 'It turns every yes into a booked job inside a week, with the glass order to ' + sup.name + ' written for you.'));
+    out.push(K.how(h, 'It turns every yes into a booked job inside a week, with the order to ' + sup.name + ' written for you.'));
 
     const yes90 = booked.length + quotes.filter((q) => fmt.daysSince(q.approvedAt || q.updatedAt) <= 90).length;
     const bookedPct = yes90 ? Math.round(booked.length / yes90 * 100) : 0;
@@ -133,7 +133,7 @@ FZ.board('yes-to-install', {
       })(),
       did: [
         { t: 'Checked ' + fmt.plural(rows.length, 'yes', 'yeses') + ' not booked in Jobber', s: ranAt || 'Live from Jobber' },
-        orders ? { t: 'Wrote ' + fmt.plural(orders, 'glass order') + ' to ' + sup.name, s: 'From the quote line items' } : null,
+        orders ? { t: 'Wrote ' + fmt.plural(orders, 'supplier order') + ' to ' + sup.name, s: 'From the quote line items' } : null,
         queued ? { t: fmt.plural(queued, 'order') + ' queued by you' } : null,
         { t: 'Ranked them by days waiting and dollars' },
         { t: 'Next: queued orders go out, then book the install', done: false }
@@ -147,11 +147,11 @@ FZ.board('yes-to-install', {
       items: picks.map((r) => ({
         meta: [{ b: short(r.total) }, ' · ' + r.ref + ', yes ' + fmt.plural(r.days, 'day') + ' ago'],
         title: r.who,
-        detail: [String(r.title || '').replace(/^[\s.]+/, ''), r.kind === 'quote' ? 'Not a job yet' : 'No visit booked', r.lines ? 'Glass order to ' + sup.name + ' is written' : 'Book the install'].filter(Boolean).join('. ') + '.',
-        review: r.lines && sup.email ? { to: sup.name + ' <' + sup.email + '>', subject: 'Glass order for ' + r.who + ', ' + r.ref, draft: supplierDraft(r), approveLabel: 'Approve and order',
+        detail: [String(r.title || '').replace(/^[\s.]+/, ''), r.kind === 'quote' ? 'Not a job yet' : 'No visit booked', r.lines ? 'Order to ' + sup.name + ' is written' : 'Book the install'].filter(Boolean).join('. ') + '.',
+        review: r.lines && sup.email ? { to: sup.name + ' <' + sup.email + '>', subject: 'Order for ' + r.who + ', ' + r.ref, draft: supplierDraft(r), approveLabel: 'Approve and order',
           note: 'Edit anything first. It goes to ' + sup.name + ' from your own email' + (sup.fromJobber ? ', address from Jobber.' : '.'),
-          approve: (text) => !FZ.queueSend ? Promise.resolve(false) : FZ.queueSend('send-' + String(r.link || r.who).replace(/[^A-Za-z0-9]+/g, '-').slice(-80), { who: r.who, link: r.link || null, to: sup.email, subject: 'Glass order for ' + r.who + ', ' + r.ref, body: text }) } : null,
-        actions: [r.lines && sup.email ? null : btn(r.lines ? 'Order glass' : 'Book it', goWork(r.ref)), r.link ? ui.extLink(r.link, 'Open in Jobber', 'fz-tlink') : null].filter(Boolean)
+          approve: (text) => !FZ.queueSend ? Promise.resolve(false) : FZ.queueSend('send-' + String(r.link || r.who).replace(/[^A-Za-z0-9]+/g, '-').slice(-80), { who: r.who, link: r.link || null, to: sup.email, subject: 'Order for ' + r.who + ', ' + r.ref, body: text }) } : null,
+        actions: [r.lines && sup.email ? null : btn(r.lines ? 'Order from supplier' : 'Book it', goWork(r.ref)), r.link ? ui.extLink(r.link, 'Open in Jobber', 'fz-tlink') : null].filter(Boolean)
       })),
       rest: { count: restRows.length, label: 'the agent is lining up on its own', list: ui.table([
         { label: 'Customer', get: (r) => r.link ? ui.extLink(r.link, r.who, 'fz-tlink') : r.who },
@@ -174,13 +174,13 @@ FZ.board('yes-to-install', {
       draft: r.lines ? supplierDraft(r) : null,
       draftLabel: 'Order to ' + sup.name,
       draftTo: sup.email || '',
-      draftSubject: 'Glass order for ' + r.who + ', ' + r.ref
+      draftSubject: 'Order for ' + r.who + ', ' + r.ref
     })), { max: 50 }));
     if (!sup.email) out.push((FZ.isOperator() || !FZ.hasOperator()) ? supplierField() : ui.note('No order email for ' + sup.name + ' in Jobber yet. Your Operator adds it once.'));
 
     out.push(ui.how('Counts approved quotes not yet converted to a job, and jobs in Jobber with no visit scheduled.',
       'Days count from the day the customer said yes. Ranked by days waiting times dollars, so a big job waiting a week comes before a small one waiting a day.',
-      'The supplier order is built from the quote line items: glass, sizes and hardware as written on the quote. Check it against your measure before you send it.',
+      'The supplier order is built from the quote line items, as written on the quote. Check it before you send it.',
       'Orders go to ' + sup.name + ', the supplier on your QuickBooks bills, at the email on their record in Jobber.', 'Waiting more than a week shows in orange.'));
     return out;
 
@@ -201,15 +201,19 @@ FZ.board('yes-to-install', {
       const lines = items.length ? items.map((l, i) => {
         const p = parseLine(l);
         const head = (i + 1) + '. ' + fmt.clean(l.name) + ', qty ' + (l.quantity || 1);
-        if (p.hardwareOnly) return head + '\n   Hardware: ' + (p.hardware || 'as quoted');
+        if (p.hardwareOnly && FZ.isGlass()) return head + '\n   Hardware: ' + (p.hardware || 'as quoted');
         return head +
-          '\n   Glass: ' + (p.glass || 'see quote, please confirm') +
-          '\n   Size: ' + (p.sizes.length ? p.sizes.join(', ') : 'to follow after final measure') +
-          '\n   Hardware: ' + (p.hardware || 'none listed');
+          (FZ.isGlass()
+            ? '\n   Glass: ' + (p.glass || 'see quote, please confirm') +
+              '\n   Size: ' + (p.sizes.length ? p.sizes.join(', ') : 'to follow after final measure') +
+              '\n   Hardware: ' + (p.hardware || 'none listed')
+            : (fmt.clean(l.description) ? '\n   ' + fmt.clean(l.description) : ''));
       }).join('\n') : '1. ' + r.title + '\n   Details to follow after final measure';
+      const own = FZ.tpl.body('supplier-order', { supplier: (sup.contact || sup.name), customer: r.who, 'in town': r.city ? ', ' + r.city : '', 'quote ref': r.ref, 'order lines': lines }, null, null);
+      if (own) return own;
       return 'Hi ' + (sup.contact || sup.name) + ',\n\nPlease confirm price and lead time on this order for ' + FZ.biz() + '.\n\n' +
         'Job: ' + r.who + (r.city ? ', ' + r.city : '') + ' (' + r.ref + ')\n\n' + lines +
-        '\n\nLet me know the earliest delivery date and I will book the install around it.\n\nThanks,\n' + FZ.sign();
+        '\n\nLet me know the earliest delivery date and I will book the job around it.\n\nThanks,\n' + FZ.sign();
     }
     function parseLine(l) {
       const name = fmt.clean(l.name);

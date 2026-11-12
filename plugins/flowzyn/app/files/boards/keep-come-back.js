@@ -37,9 +37,10 @@ FZ.board('come-back', {
 
     const months = (iso) => Math.max(1, Math.round(fmt.daysSince(iso) / 30.4));
     const street = (j) => fmt.clean(j.property && j.property.address && j.property.address.street1);
-    const draft = (g) => 'Hi ' + fmt.firstName(g.name) + ',\n\n' +
+    const draft = (g) => FZ.tpl.body('check-in', { 'first name': fmt.firstName(g.name), months: months(g.last.completedAt), work: fmt.clean(g.last.title).toLowerCase(), 'at address': street(g.last) ? ' at ' + street(g.last) : '' }, null, draft0(g));
+    const draft0 = (g) => 'Hi ' + fmt.firstName(g.name) + ',\n\n' +
       'It is ' + FZ.me().first + ' at ' + FZ.biz() + '. It has been about ' + months(g.last.completedAt) + ' months since we did the ' + fmt.clean(g.last.title).toLowerCase() + (street(g.last) ? ' at ' + street(g.last) : '') + '. I hope it is all holding up well.\n\n' +
-      'If there is anything else on your list, like a mirror, a shower door or a window that sticks, I would be glad to come take a look. Just reply and we will find a time.\n\n' +
+      'If there is anything else on your list, I would be glad to come take a look. Just reply and we will find a time.\n\n' +
       FZ.sign();
 
     ctx.metric('come-back', due.length
@@ -63,7 +64,7 @@ FZ.board('come-back', {
         { name: 'Ridge Road Cabin', past: 6200, mo: 9 },
         { name: 'Main Street Dental', past: 5100, mo: 11, ask: true },
         { name: 'Pine Lane Home', past: 3900, mo: 13 },
-        { name: 'Ski Hill Rental', past: 2700, mo: 15 },
+        { name: 'Example Rental Co', past: 2700, mo: 15 },
         { name: 'Hilltop Duplex', past: 1800, mo: 17 }
       ];
       out.push(K.quiet(h,
@@ -74,7 +75,7 @@ FZ.board('come-back', {
         ]),
         K.example(h, '2 of 6 past clients asked for a quote', [
           tiles(EX.map((g) => ({ name: g.name, mo: g.mo, amt: fmt.money(g.past, { short: true }) + ' past work', tag: g.ask ? 'Asked for a quote' : 'Checked in', hi: g.ask }))),
-          h('p', { class: 'cb-note' }, 'Made up for a glass shop in Breckenridge. Your real past clients replace this.')])));
+          h('p', { class: 'cb-note' }, 'Made up. Your real past clients replace this.')])));
     } else {
       out.push(ui.status(due.length
         ? [fmt.plural(due.length, 'past client') + ' worth ', { b: fmt.money(dueSum, { short: true }) }, ' have not heard from you in 6 to 18 months. ', { b: due.length === 1 ? 'The check in is written.' : 'Check ins are written.' }]

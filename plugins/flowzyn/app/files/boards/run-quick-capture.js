@@ -16,7 +16,7 @@ FZ.board('quick-capture', {
     const nameIn = h('input', { type: 'text', placeholder: 'Customer name, like Jake', autocomplete: 'off' });
     const pick = h('select', { hidden: true });
     const propSel = h('select', { hidden: true });
-    const whatIn = h('input', { type: 'text', placeholder: 'What they want, like mirror for the primary closet' });
+    const whatIn = h('input', { type: 'text', placeholder: 'What they want, in a few words' });
     const sizeIn = h('input', { type: 'text', placeholder: 'Sizes in inches, like 44 x 30 (optional)' });
     const preview = h('div', { class: 'sa-math' });
     const msg = h('p', { class: 'fz-hint', role: 'status' });
@@ -49,7 +49,7 @@ FZ.board('quick-capture', {
     const form = h('div', { class: 'sa-form' },
       h('label', null, 'Customer', nameIn), pick, propSel,
       h('label', null, 'What they asked for', whatIn),
-      h('label', null, 'Sizes', sizeIn), h('div', { class: 'sa-row' }, A.photoSizesBtn(sizeIn, () => whatIn.value, msg)), preview,
+      ...(FZ.isGlass() ? [h('label', null, 'Sizes', sizeIn), h('div', { class: 'sa-row' }, A.photoSizesBtn(sizeIn, () => whatIn.value, msg)), preview] : []),
       h('div', { class: 'sa-row' }, go), msg);
     go.addEventListener('click', async () => {
       if (!pick.value || !propSel.value) { msg.textContent = 'Pick the customer and the address first.'; return; }
@@ -82,7 +82,7 @@ FZ.board('quick-capture', {
       { label: 'What', get: (x) => x.what },
       { label: 'Added', get: (x) => fmt.fmtDate(x.when) }
     ], rows.slice(0, 12))));
-    out.push(ui.note('Photos: take a photo of the drawing and it reads the sizes. Jobber does not let agents attach the photo to the request, so keep it in Jobber yourself if you need it there.'));
+    if (FZ.isGlass()) out.push(ui.note('Photos: take a photo of the drawing and it reads the sizes. Jobber does not let agents attach the photo to the request, so keep it in Jobber yourself if you need it there.'));
     out.push(ui.how('Finds the customer and address in Jobber.', 'Creates the request. With sizes, it drafts the quote ' + (book.method === 'supplier' ? 'from your supplier costs' : 'at your price book') + ' and links it to the request.', 'The quote stays a draft. You check it and send it from Jobber.'));
     return out;
   }

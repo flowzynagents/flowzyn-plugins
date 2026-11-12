@@ -47,7 +47,7 @@ FZ.board('install-scheduler', {
       const late = stage === 'waiting' && days > RULES.noDateDays;
       const landed = (!!p.landedAt || (p.delivery && new Date(p.delivery + 'T23:59:00') < new Date())) && stage !== 'picked';
       const noAnswer = stage === 'asked' && (fmt.daysSince(p.askedAt) || 0) > RULES.noAnswerDays;
-      return { j, p, who, first, ordered, stage, days, late, landed, noAnswer, total: Number(j.total) || 0, what: fmt.clean(j.title) || 'glass', city: j.property && j.property.address && fmt.clean(j.property.address.city) };
+      return { j, p, who, first, ordered, stage, days, late, landed, noAnswer, total: Number(j.total) || 0, what: fmt.clean(j.title) || 'job', city: j.property && j.property.address && fmt.clean(j.property.address.city) };
     });
     const ORDER = { picked: 0, asked: 1, dated: 2, waiting: 3 };
     rows.sort((a, b) => (b.late || b.landed || b.noAnswer) - (a.late || a.landed || a.noAnswer) || ORDER[a.stage] - ORDER[b.stage] || b.days - a.days);
@@ -63,10 +63,10 @@ FZ.board('install-scheduler', {
     const hi = (r) => (/\b(cabin|builders?|hoa|llc|inc|condo|residence|group|homes|mgmt|management|construction|remodel|dental|company|co)\b/i.test(r.who) ? 'there' : r.first);
     const statusText = (r) => {
       if (r.stage === 'picked') return 'Hi ' + hi(r) + ', you are booked in for ' + nice(r.p.picked) + '. The crew will text when they are on the way. ' + FZ.sign();
-      if (r.p.delivery) return 'Hi ' + hi(r) + ', your glass is due ' + nice(r.p.delivery) + '. ' + (r.stage === 'asked' ? 'Just let me know which day works for the install and we will lock it in. ' : 'We will be in touch with install days as soon as it lands. ') + FZ.sign();
-      return 'Hi ' + hi(r) + ', your glass is on order with our supplier. I will let you know the delivery date as soon as they confirm it, and we will set the install right after. ' + FZ.sign();
+      if (r.p.delivery) return 'Hi ' + hi(r) + ', your order is due ' + nice(r.p.delivery) + '. ' + (r.stage === 'asked' ? 'Just let me know which day works for the install and we will lock it in. ' : 'We will be in touch with install days as soon as it lands. ') + FZ.sign();
+      return 'Hi ' + hi(r) + ', your order is in with our supplier. I will let you know the delivery date as soon as they confirm it, and we will set the day right after. ' + FZ.sign();
     };
-    const askText = (r, two) => 'Hi ' + hi(r) + ', good news, your glass lands ' + short(r.p.delivery) + '. We can install ' + two.map(nice).join(' or ') + '. Which works best for you? ' + FZ.sign();
+    const askText = (r, two) => 'Hi ' + hi(r) + ', good news, your order lands ' + short(r.p.delivery) + '. We can install ' + two.map(nice).join(' or ') + '. Which works best for you? ' + FZ.sign();
 
     // One step at a time (Matt, Nov 7: "not clear what to do here, what happens after"): the one question for this job, one main button,
     // one quiet way out, and what happens next. Every button the same size.
@@ -88,7 +88,7 @@ FZ.board('install-scheduler', {
       } else if (r.stage === 'dated') {
         const two = freeDays(r.p.delivery, 2); const note = askText(r, two);
         q = 'Ask ' + nm(r) + ' which install day works';
-        why = 'Glass lands ' + nice(r.p.delivery) + (r.landed ? ', already here' : '') + '. Free days: ' + two.map(nice).join(' or ') + (S.signer ? '. ' + S.signer + ' signs for it.' : '.');
+        why = 'Delivery ' + nice(r.p.delivery) + (r.landed ? ', already here' : '') + '. Free days: ' + two.map(nice).join(' or ') + (S.signer ? '. ' + S.signer + ' signs for it.' : '.');
         extra = h('pre', { class: 'is-note' }, note);
         const sent = h('button', { type: 'button', class: 'fz-btn' }, 'I sent it');
         sent.addEventListener('click', async () => { sent.disabled = true; if (await save(r, { askedAt: new Date().toISOString(), offered: two })) rerender(); else sent.disabled = false; });
@@ -135,7 +135,7 @@ FZ.board('install-scheduler', {
       sMsg.textContent = (await A.setDoc('settings/schedule', next)) ? 'Saved. Install days are picked with these rules.' : 'Could not save.';
     });
 
-    // The supplier's status sheet already has the dates (Matt, Nov 8: "he knows when the glass will land because of that spreadsheet").
+    // The supplier's status sheet already has the dates (Matt, Nov 8).
     // Drop a screenshot of it, or paste its rows, and every waiting job gets its date in one tap.
     const norm = (x) => String(x || '').toLowerCase().replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
     const matchJob = (o) => {
@@ -160,7 +160,7 @@ FZ.board('install-scheduler', {
           const orders = await A.readStatusSheet(files, text);
           const hits = orders.filter((o) => o.delivery).map((o) => ({ o, r: matchJob(o) })).filter((x) => x.r);
           const seen = new Set(); const uniq = hits.filter((x) => (seen.has(x.r.j.id) ? false : seen.add(x.r.j.id)));
-          if (!uniq.length) { msg.textContent = orders.length ? 'Read ' + fmt.plural(orders.length, 'order') + ', but none matched a job waiting on glass with a date. Type the dates below.' : 'Could not read any orders. Try a clearer screenshot.'; return; }
+          if (!uniq.length) { msg.textContent = orders.length ? 'Read ' + fmt.plural(orders.length, 'order') + ', but none matched a job waiting on a delivery with a date. Type the dates below.' : 'Could not read any orders. Try a clearer screenshot.'; return; }
           msg.textContent = 'Found dates for ' + fmt.plural(uniq.length, 'job') + '. Check them, then save.';
           const save1 = h('button', { type: 'button', class: 'fz-btn act' }, 'Save ' + (uniq.length === 1 ? 'this date' : 'all ' + uniq.length + ' dates'));
           save1.addEventListener('click', async () => { save1.disabled = true; let ok = 0; for (const x of uniq) if (await save(x.r, { delivery: x.o.delivery, deliveryFrom: 'supplier sheet' })) ok++; if (ok) rerender(); else { save1.disabled = false; msg.textContent = 'Could not save. Try again.'; } });
@@ -172,7 +172,7 @@ FZ.board('install-scheduler', {
       readBtn.addEventListener('click', () => { if (paste.value.trim()) run([], paste.value.trim()); else { msg.textContent = 'Paste the rows first.'; paste.focus(); } });
       return h('article', { class: 'fz-card is-card is-sheet' },
         h('h3', { class: 'is-q' }, 'Get the dates from the supplier sheet'),
-        h('p', { class: 'is-why' }, 'Take a screenshot of the status sheet and add it here. It reads each order, matches it to your jobs and fills in when the glass lands.'),
+        h('p', { class: 'is-why' }, 'Take a screenshot of the status sheet and add it here. It reads each order, matches it to your jobs and fills in when each delivery lands.'),
         h('div', { class: 'is-ctl' }, pick, file), paste, h('div', { class: 'is-ctl' }, readBtn), msg, list,
         h('style', null, '.is-paste{width:100%;box-sizing:border-box;background:var(--card);color:var(--fg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font:inherit;font-size:14px}.is-hit{margin:0;font-size:15px}.is-sheetlist{display:flex;flex-direction:column;gap:6px}'));
     };
@@ -186,7 +186,7 @@ FZ.board('install-scheduler', {
       : ['Every job has an install day booked.']));
     out.push(h('style', null, IS_CSS));
     // Glance: where every job is, step by step, with the step that needs the owner first.
-    const STEPS = [['waiting', 'Waiting on glass', 'Asking the supplier'], ['dated', 'Glass date known', 'Ask the customer'], ['asked', 'Customer asked', 'Waiting on their pick'], ['picked', 'Day picked', 'Set it in Jobber']];
+    const STEPS = [['waiting', 'Waiting on delivery', 'Asking the supplier'], ['dated', 'Delivery date known', 'Ask the customer'], ['asked', 'Customer asked', 'Waiting on their pick'], ['picked', 'Day picked', 'Set it in Jobber']];
     const cnt = (k) => rows.filter((r) => r.stage === k).length;
     const hot = (k) => rows.some((r) => r.stage === k && (r.late || r.landed || r.noAnswer)) || (k === 'dated' && cnt(k)) || (k === 'picked' && cnt(k));
     if (rows.length) out.push(h('div', { class: 'viz is-flow' }, h('div', { class: 'is-steps' }, STEPS.map(([k, t, next]) => h('a', { class: 'is-step' + (cnt(k) ? '' : ' zero') + (hot(k) ? ' hot' : ''), href: '#a-install-scheduler', onclick: (e) => { e.preventDefault(); const tb = document.querySelector('#fz-board .fz-subtabs [data-id="work"]'); if (tb) tb.click(); } },
@@ -196,9 +196,9 @@ FZ.board('install-scheduler', {
     out.push(h('details', { class: 'fz-tablebox is-rules', open: S.saved ? null : '' }, h('summary', null, 'Your install rules: ' + S.days.map((d) => DN[d]).join(', ') + ', ' + S.perDay + ' a day'), h('div', { class: 'sa-form' }, h('div', { class: 'sa-row' }, ...boxes), h('label', null, 'Installs a day', per), h('label', null, 'Signs for deliveries', signer), h('div', { class: 'sa-row' }, sBtn), sMsg), h('style', null, '.is-rules{border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin-top:14px}.is-rules summary{cursor:pointer;font-weight:700}')));
     if (rows.some((r) => r.stage === 'waiting')) out.push(h('details', { class: 'fz-tablebox is-rules' }, h('summary', null, 'Have a screenshot of the supplier sheet? Add it to fill dates early'), sheetCard()));
     out.push(ui.note('Customer texts are not connected, so you copy them from here. The note can also go by email from the send queue.'));
-    out.push(ui.how('Every job in Jobber with no visit is glass on order. The delivery date is read from the supplier\'s reply to the order email, and the supplier gets a nudge after 3 days.',
+    out.push(ui.how('Every job in Jobber with no visit is waiting on a day. The delivery date is read from the supplier\'s reply to the order email, and the supplier gets a nudge after 3 days.',
       'It picks the first two install days after delivery, skipping days already full in Jobber, and writes the note asking the customer which works.',
-      'When they pick, you set the visit in Jobber in one tap. Flags: no delivery date after ' + RULES.noDateDays + ' days, glass landed with no day, no answer after ' + RULES.noAnswerDays + ' days.'));
+      'When they pick, you set the visit in Jobber in one tap. Flags: no delivery date after ' + RULES.noDateDays + ' days, delivery landed with no day, no answer after ' + RULES.noAnswerDays + ' days.'));
     return out;
   }
 });

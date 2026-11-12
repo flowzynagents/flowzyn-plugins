@@ -115,11 +115,11 @@
       row('Monthly goal', goal ? short(goal) + ' invoiced' : 'Not set yet', linkBtn('Edit', '#shop-goal', 'q')),
       row('Shop details', [prof.phone, prof.shopAddress, prof.website ? String(prof.website).replace(/^https?:\/\//, '') : null].filter(Boolean).join(' · ') || 'Phone, address, from your website', linkBtn('Edit', '#shop-details', 'q')),
       row('Install days and crew', sch.days.map((d) => DN[d]).join(', ') + ' · ' + sch.perDay + ' a day' + (sch.signer ? ' · ' + sch.signer + ' signs' : ''), linkBtn('Edit', '#shop-installs', 'q')),
-      row('Price book', '$' + book.showerRate + ' sq ft + $' + book.install + ' + $' + book.hardware + (book.method === 'supplier' ? ' · priced from supplier costs' : ''), linkBtn('Edit', '#shop-prices', 'q')),
-      row('Supplier cost sheet', (book.supplier && (book.supplier.items || []).length) ? fmt.plural(book.supplier.items.length, 'price') + ' loaded' : 'Not loaded. A photo of it. Optional, if you price from costs', linkBtn((book.supplier && (book.supplier.items || []).length) ? 'Edit' : 'Add', '#a-supplier-costs', 'q')),
+      FZ.isGlass() && row('Price book', '$' + book.showerRate + ' sq ft + $' + book.install + ' + $' + book.hardware + (book.method === 'supplier' ? ' · priced from supplier costs' : ''), linkBtn('Edit', '#shop-prices', 'q')),
+      FZ.isGlass() && row('Supplier cost sheet', (book.supplier && (book.supplier.items || []).length) ? fmt.plural(book.supplier.items.length, 'price') + ' loaded' : 'Not loaded. A photo of it. Optional, if you price from costs', linkBtn((book.supplier && (book.supplier.items || []).length) ? 'Edit' : 'Add', '#a-supplier-costs', 'q')),
       row('Builder areas', ((Array.isArray(prof.builderAreas) && prof.builderAreas.length) ? prof.builderAreas.join(', ') : 'Every area loaded') + (prof.builderWanted ? ' · wants ' + prof.builderWanted : ''), linkBtn('Edit', '#shop-builders', 'q')),
       row('Google review link', prof.reviewLink ? String(prof.reviewLink).replace(/^https?:\/\//, '') : 'Not saved yet. Used in every review ask', linkBtn('Edit', '#shop-review', 'q')),
-      row('Morning brief', (prof.briefTime || '6:03am') + ' weekdays · email', linkBtn('Edit', '#shop-brief', 'q')),
+      row('Morning brief', 'With your morning run, weekdays · email', linkBtn('Edit', '#shop-brief', 'q')),
       row('Email templates', nTpl + ' your agents write from' + (edited ? ', ' + edited + ' edited' : ''), linkBtn('Edit', '#templates', 'q')));
     const senders = Object.entries(FZ.auto.SENDERS);
     const togs = el('div', 'v3-card v3-rows', ...senders.map(([k, label]) => {
@@ -151,8 +151,8 @@
     } else if (which === 'details') {
       const sup = Object.assign({ name: '', email: '' }, prof.supplier || {});
       const f = [['Business', 'business', prof.business], ['Your name', 'owner', prof.owner], ['Phone', 'phone', prof.phone], ['Shop address', 'shopAddress', prof.shopAddress], ['Website', 'website', prof.website]].map(([l, k, v]) => [k, ...inp(l, v)]);
-      const [ls, is] = inp('Glass supplier', sup.name); const [le, ie] = inp('Supplier order email', sup.email, { type: 'email', placeholder: 'orders@supplier.com' });
-      title = ['Shop ', { b: 'details' }, '.']; sub = 'From your website and Jobber. Used on emails, flyers and glass orders.'; fields = [...f.map((x) => x[1]), ls, le];
+      const [ls, is] = inp('Main supplier', sup.name); const [le, ie] = inp('Supplier order email', sup.email, { type: 'email', placeholder: 'orders@supplier.com' });
+      title = ['Shop ', { b: 'details' }, '.']; sub = 'From your website and Jobber. Used on emails and supplier orders.'; fields = [...f.map((x) => x[1]), ls, le];
       save = async () => { const patch = {}; f.forEach(([k, , i]) => { patch[k] = i.value.trim(); }); patch.supplier = Object.assign({}, sup, { name: is.value.trim() || sup.name, email: ie.value.trim() }); return FZ.saveProfile(patch); };
     } else if (which === 'installs') {
       const S = Object.assign({ days: [1, 2, 3, 4, 5], perDay: 2, signer: '' }, (await A().getDoc('settings/schedule')) || {});
@@ -194,9 +194,9 @@
         l];
       save = () => FZ.saveProfile({ reviewLink: i.value.trim() });
     } else if (which === 'brief') {
-      const sel = h('select', null, ...['5:33am', '6:03am', '6:33am', '7:03am'].map((t) => h('option', { value: t, selected: (prof.briefTime || '6:03am') === t ? '' : null }, t)));
-      title = ['Morning ', { b: 'brief' }, '.']; sub = 'One email a day on weekdays, only when something needs you. It opens Today.';
-      fields = [h('label', null, 'Send it at', sel), h('p', { class: 'v3-note' }, 'The email turns on once your Operator switches it on for you.')];
+      const sel = h('select', null, ...['5:33am', '6:03am', '6:33am', '7:03am'].map((t) => h('option', { value: t, selected: (prof.briefTime || '6:30am') === t ? '' : null }, t)));
+      title = ['Morning ', { b: 'brief' }, '.']; sub = 'One email a day on weekdays, only when something needs you. It lists the biggest three and sends you here.';
+      fields = [h('p', { class: 'v3-note' }, 'It is written by your morning run, which starts at 6:30am on weekdays, and comes from your own email. To move the time, ask Claude to change your Flowzyn morning run.')];
       save = () => FZ.saveProfile({ briefTime: sel.value });
     } else { location.hash = '#setup'; return; }
     const sv = btn('Save', async () => { sv.disabled = true; msg.textContent = 'Saving…'; done(await save()); sv.disabled = false; });
@@ -290,7 +290,7 @@
     });
     const back = btn('Back to the original', async () => { back.disabled = true; if (await FZ.tpl.reset(id)) { V.clear(); editor(box, id); } else { msg.textContent = 'Could not reset. Try again.'; back.disabled = false; } }, 'q');
     // A preview with example values, so he sees how the fill ins read.
-    const EX = { 'first name': 'Cody', business: FZ.biz(), owner: FZ.me().first, signature: FZ.sign(), town: FZ.town(), invoice: '2997', amount: '$5,100', 'due date': 'Oct 25', work: 'shower enclosure', 'sent date': 'Aug 15', 'what they asked': 'shower enclosure and mirrors', 'at address': ' at 19 Lodge Pole Ln', 'about address': ' about 19 Lodge Pole Ln', customer: 'Taylor Reed', 'quote ref': 'Quote #2437', 'in town': ', ' + FZ.town(), supplier: ((FZ.profile().supplier || {}).name || 'your supplier'), 'order lines': '1. Shower enclosure, qty 1\n   Glass: 3/8 clear\n   Size: 74 x 82 in', builder: 'Ridge Line Builders', project: 'new home build', address: '120 Ski Hill Rd', greeting: 'Hello Alpine Kitchen and Bath team,', month: 'July 2026', 'for work': 'your shower enclosure', months: '9', 'review link': (FZ.profile().reviewLink || 'your review link') };
+    const EX = { 'first name': 'Cody', business: FZ.biz(), owner: FZ.me().first, signature: FZ.sign(), town: FZ.town(), invoice: '2997', amount: '$5,100', 'due date': 'Oct 25', work: 'install', 'sent date': 'Aug 15', 'what they asked': 'a new install', 'at address': ' at 19 Lodge Pole Ln', 'about address': ' about 19 Lodge Pole Ln', customer: 'Taylor Reed', 'quote ref': 'Quote #2437', 'in town': ', ' + FZ.town(), supplier: ((FZ.profile().supplier || {}).name || 'your supplier'), 'order lines': '1. Item from the quote, qty 1\n   As written on the quote', builder: 'Ridge Line Builders', project: 'new home build', address: '120 Main St', greeting: 'Hello Alpine Property Management team,', month: 'July 2026', 'for work': 'your install', months: '9', 'review link': (FZ.profile().reviewLink || 'your review link') };
     const prev = h('pre', { class: 'v3-paste' });
     const paintPrev = () => { const sub = fromNodes(subj), bd = fromNodes(body); const line = lineEds[0] ? fromNodes(lineEds[0][2]) : ''; const f = (s) => s.replace(/\{([^{}]+)\}/g, (m, k) => (k === (t.def.lines && t.def.lines.fill) ? line : EX[k] != null ? EX[k] : '')).replace(/ ([,.])/g, '$1'); prev.textContent = 'Subject: ' + f(sub) + '\n\n' + f(bd); };
     [subj, body, ...lineEds.map((x) => x[2])].forEach((e) => e.addEventListener('input', paintPrev));

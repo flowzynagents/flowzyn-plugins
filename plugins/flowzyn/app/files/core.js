@@ -8,8 +8,8 @@
     { id: 'growth', name: 'Win agents', line: 'Win more of the right work', sets: [
       { title: 'New work', agents: [
         // Target Areas taken out (Matt, Nov 10). Its board file is kept for later.
-        { key: 'builder-engine', name: 'Reach Builders', does: 'Finds builders with new project approvals and drafts a note from you', num: 'Builders who replied' },
-        { key: 'partner-finder', name: 'Find Partners', does: 'Finds designers, showrooms and rental managers', num: 'New partners sending work' },
+        { key: 'builder-engine', name: 'Reach Builders', does: 'Finds builders with new projects near you and drafts a note from you', num: 'Builders who replied' },
+        { key: 'partner-finder', name: 'Find Partners', does: 'Finds local businesses that can send you work', num: 'New partners sending work' },
         { key: 'local-search-check', name: 'Fix Listings', does: 'Your Google Maps ranking and three fixes a month', num: 'Searches you show up in' }
       ] },
       { title: 'Lost work', agents: [
@@ -24,20 +24,21 @@
         { key: 'lead-catcher', name: 'Answer Enquiries', step: '1 They ask', does: 'New enquiries waiting for a reply or a visit', num: 'Hours to first reply' }
       ] },
       { title: '2 Quotes', agents: [
-        { key: 'quotes', name: 'Quote Jobs', step: '2 You quote', does: 'Every measured job quoted, priced from your costs or formula', num: 'Days from measure to quote' },
+        { key: 'quotes', name: 'Quote Jobs', step: '2 You quote', does: 'Every job you have visited quoted, priced the way you price', num: 'Days from measure to quote' },
         { key: 'quick-capture', hidden: true, parent: 'quotes', tab: 'capture', name: 'Capture Requests', step: 'Any time', does: 'Anything asked for on site goes straight into Jobber', num: 'Site asks captured' },
         { key: 'quote-prep', hidden: true, parent: 'quotes', tab: 'work', name: 'Draft Quotes', step: '2 You quote', does: 'Drafts each quote from your site visit, prices and past jobs', num: 'Days from site visit to quote' },
         { key: 'supplier-costs', hidden: true, parent: 'quotes', tab: 'pricing', name: 'Load Costs', step: '2 You quote', does: 'Every quote priced from what the glass really costs you', num: 'Quotes priced from supplier costs' },
         { key: 'price-book', hidden: true, parent: 'quotes', tab: 'pricing', name: 'Set Prices', step: '2 You quote', does: 'Your price book, learned from every past quote', num: 'Quotes priced to the book' },
         { key: 'quote-chaser', featured: true, name: 'Chase Quotes', step: '2 You quote', does: 'Follows up quotes after Jobber stops', num: 'Quotes won after a follow up' }
       ] },
-      { title: '3 Glass and installs', agents: [
-        { key: 'yes-to-install', name: 'Book Jobs', step: '3 They say yes', does: 'Approved work not yet booked, glass order written', num: 'Days from yes to install' },
-        { key: 'install-scheduler', name: 'Schedule Installs', step: '3 They say yes', does: 'An install day lined up as soon as the glass lands', num: 'Days from delivery to install' }
+      { title: '3 Booking the work', agents: [
+        { key: 'yes-to-install', hidden: true, parent: 'install-scheduler', name: 'Schedule Installs', step: '3 They say yes', does: 'Approved work not yet booked, supplier order written', num: 'Days from yes to install' },
+        { key: 'install-scheduler', name: 'Schedule Installs', step: '3 They say yes', does: 'Every yes booked, from the order to the day the work is done', num: 'Days from yes to the booked day' }
       ] },
       { title: '4 Getting paid', agents: [
         { key: 'bill-it', name: 'Send Invoices', step: '4 The job', does: 'Work done but not invoiced, oldest first', num: 'Dollars not invoiced' },
-        { key: 'get-paid', featured: true, name: 'Collect Payments', step: '5 They pay', does: 'Overdue invoices with a friendly nudge ready', num: 'Overdue dollars collected' }
+        { key: 'get-paid', featured: true, name: 'Collect Payments', step: '5 They pay', does: 'Overdue invoices with a friendly nudge ready', num: 'Overdue dollars collected' },
+        { key: 'pay-bills', name: 'Pay Bills', step: '6 You pay', does: 'Supplier bills due this week, doubles and jumps flagged', num: 'Bills paid on time' }
       ] }
     ] },
     { id: 'keep', name: 'Keep agents', line: 'Keep customers coming back', sets: [
@@ -66,7 +67,7 @@
   const opWho = (cap) => opName() || (cap ? 'Your Operator' : 'your Operator');
 
   // ---------- Formatting ----------
-  const TZ = 'America/Denver';
+  let TZ = 'America/Denver'; // the shop's own zone once its profile loads (settings/profile timeZone)
   const money = (n, opts) => {
     n = Number(n) || 0;
     if (opts && opts.short && Math.abs(n) >= 1000000) return '$' + (n / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
@@ -85,7 +86,7 @@
   const clean = (s) => String(s == null ? '' : s).replace(/\s+/g, ' ').trim();
   const isoDaysAgo = (d) => new Date(Date.now() - d * 86400000).toISOString().replace(/\.\d+Z$/, 'Z');
   const isoDaysAhead = (d) => new Date(Date.now() + d * 86400000).toISOString().replace(/\.\d+Z$/, 'Z');
-  const fmt = { money, dayKey, fmtDay, fmtDate, fmtTime, daysSince, daysUntil, plural, firstName, clean, isoDaysAgo, isoDaysAhead, TZ };
+  const fmt = { money, dayKey, fmtDay, fmtDate, fmtTime, daysSince, daysUntil, plural, firstName, clean, isoDaysAgo, isoDaysAhead, get TZ() { return TZ; } };
 
   // ---------- Jobber data layer ----------
   let mcpP = null;
@@ -535,7 +536,10 @@
     };
     // A shop's own copy has no video files (Nov 10), so only links saved in settings/videos play there.
     const FILES = window.FZ_SHOP_COPY ? {} : VIDEO_FILES;
-    if (VIDEOS === null) store('settings/videos').then((d) => { VIDEOS = Object.assign({}, FILES, d || {}); }).catch(() => { VIDEOS = Object.assign({}, FILES); });
+    const showIfAny = () => { btn.hidden = !(VIDEOS && VIDEOS[agent.key]); };
+    btn.hidden = true;
+    if (VIDEOS === null) store('settings/videos').then((d) => { VIDEOS = Object.assign({}, FILES, d || {}); }).catch(() => { VIDEOS = Object.assign({}, FILES); }).then(() => document.querySelectorAll('.fz-play').forEach((b) => { if (b.__show) b.__show(); }));
+    btn.__show = showIfAny; showIfAny();
     return btn;
   }
 
@@ -628,7 +632,7 @@
   const stored = {};   // metrics/<key> written by scheduled runs
   const runs = {};     // runs/<key>: {last, week, total}
   const settings = {}; // agents/<key>: {enabled}
-  const POPULAR = [['builder-engine', 'Finds builders with new project approvals in Denver and Boulder, drafts your intro, tracks replies.', true], ['quote-chaser', 'Follows up quotes after Jobber\u2019s reminders stop.'], ['get-paid', 'Friendly nudges for overdue invoices.']];
+  const POPULAR = [['builder-engine', 'Finds builders with new projects near you, drafts your intro, tracks replies.', true], ['quote-chaser', 'Follows up quotes after Jobber\u2019s reminders stop.'], ['get-paid', 'Friendly nudges for overdue invoices.']];
   const popNodes = [];
   const POP_KEYS = new Set(POPULAR.map((p) => p[0]));
   function buildPopular() {
@@ -651,11 +655,11 @@
     'come-back': '15th of the month', 'stand-behind-it': 'Mondays 6:30am'
   };
   // The outcome each agent is there to deliver, in one line.
-  const OUTCOME = {"where-to-find-work": "Picks the neighbourhoods most likely to need glass, and shows why on a map.", "quotes": "Drafts a quote for every measured job, reads sizes from a drawing photo, prices it from your supplier costs or your formula, and creates the draft in Jobber for you to send.", "supplier-costs": "Reads your supplier's cost sheet from a photo, then prices every quote from the real glass and hardware cost plus your markup.", "quick-capture": "Turns anything asked for on site into a Jobber request, with a draft quote at your price book when you give the sizes.", "price-book": "Reads every past quote and builds your price book, so every new quote is priced the same way.", "install-scheduler": "Tracks every job from glass ordered to install day. You type the delivery date, it lines up the first free days and writes the note asking the customer to pick one.", "builder-engine": "Watches new project approvals near you and emails each builder an intro from you.", "lost-quote-revival": "Finds quotes archived 2 to 12 months ago and writes each customer a fresh offer.", "partner-finder": "Finds designers, showrooms and rental managers near you and writes each an intro.", "local-search-check": "Checks where you show up in local searches and lists the fixes that move you up.", "morning-brief": "One page each weekday with what is ready for your OK and this week's wins.", "lead-catcher": "Spots new enquiries in Jobber and writes the reply that books a visit.", "quote-prep": "Drafts a priced quote after every site visit, from the sizes on the request or a photo you send, your past jobs and prices.", "quote-chaser": "Picks up quotes after Jobber's reminders stop and writes each follow up.", "replies": "Catches customers who said yes or asked for changes and writes your answer.", "yes-to-install": "Finds approved quotes with no job or date, drafts the glass order to your supplier, and shows what to book in Jobber.", "week-board": "Shows this week by crew, with late visits and open days.", "bill-it": "Finds finished jobs with no invoice, oldest first, and lines each one up so you invoice it in one tap in Jobber.", "get-paid": "Finds overdue invoices and writes a friendly payment reminder for each.", "month-close": "Checks the month is ready for your bookkeeper by day 3.", "weather-watch": "Checks this week's jobs against the forecast and drafts a heads up to customers.", "crew-sheet": "Builds a page per crew for tomorrow with addresses, notes and gate codes.", "cash-in": "Lists money due in the next 30 days, from invoices and deposits.", "pay-bills": "Lists supplier bills due this week and flags doubles and price jumps.", "price-watch": "Flags price list items selling too close to what they cost you.", "own-permits": "Tracks your own permits and inspections that hold up a final invoice.", "add-on-finder": "Spots extras that usually go with a job and are missing from a quote.", "shop-handbook": "Answers how you priced and described past work, from your own jobs.", "review-ask": "Picks customers who just paid and writes them a review request from you.", "review-watch": "Reads your reviews against nearby shops and writes a reply for each new one.", "builder-keep": "Shows your best builders and the ones you have not spoken to in a while.", "come-back": "Finds clients from 6 to 18 months ago with no work since and writes a check in.", "stand-behind-it": "Lists warranties ending soon and writes a check in before each one ends."};
+  const OUTCOME = {"where-to-find-work": "Picks the neighbourhoods most likely to need glass, and shows why on a map.", "quotes": "Drafts a quote for every job you have visited, from your price list and similar past quotes, and creates the draft in Jobber for you to send.", "supplier-costs": "Reads your supplier's cost sheet from a photo, then prices every quote from the real glass and hardware cost plus your markup.", "quick-capture": "Turns anything asked for on site into a Jobber request, with a draft quote at your price book when you give the sizes.", "price-book": "Reads every past quote and builds your price book, so every new quote is priced the same way.", "install-scheduler": "Takes every yes from the supplier order to a booked day. It reads the delivery date from your supplier's email, lines up the first free days and writes the note asking the customer to pick one.", "builder-engine": "Finds builders with new projects near you and writes each an intro from you.", "lost-quote-revival": "Finds quotes archived 2 to 12 months ago and writes each customer a fresh offer.", "partner-finder": "Finds local businesses that can send you work and writes each an intro.", "local-search-check": "Checks where you show up in local searches and lists the fixes that move you up.", "morning-brief": "One page each weekday with what is ready for your OK and this week's wins.", "lead-catcher": "Spots new enquiries in Jobber and writes the reply that books a visit.", "quote-prep": "Drafts a priced quote after every site visit, from your past jobs and prices.", "quote-chaser": "Picks up quotes after Jobber's reminders stop and writes each follow up.", "replies": "Catches customers who said yes or asked for changes and writes your answer.", "yes-to-install": "Finds approved quotes with no job or date, drafts the order to your supplier, and shows what to book in Jobber.", "week-board": "Shows this week by crew, with late visits and open days.", "bill-it": "Finds finished jobs with no invoice, oldest first, and lines each one up so you invoice it in one tap in Jobber.", "get-paid": "Finds overdue invoices and writes a friendly payment reminder for each.", "month-close": "Checks the month is ready for your bookkeeper by day 3.", "weather-watch": "Checks this week's jobs against the forecast and drafts a heads up to customers.", "crew-sheet": "Builds a page per crew for tomorrow with addresses, notes and gate codes.", "cash-in": "Lists money due in the next 30 days, from invoices and deposits.", "pay-bills": "Lists supplier bills due this week and flags doubles and price jumps.", "price-watch": "Flags price list items selling too close to what they cost you.", "own-permits": "Tracks your own permits and inspections that hold up a final invoice.", "add-on-finder": "Spots extras that usually go with a job and are missing from a quote.", "shop-handbook": "Answers how you priced and described past work, from your own jobs.", "review-ask": "Picks customers who just paid and writes them a review request from you.", "review-watch": "Reads your reviews against nearby shops and writes a reply for each new one.", "builder-keep": "Shows your best builders and the ones you have not spoken to in a while.", "come-back": "Finds clients from 6 to 18 months ago with no work since and writes a check in.", "stand-behind-it": "Lists warranties ending soon and writes a check in before each one ends."};
   AGENTS.forEach((a) => { a.outcome = OUTCOME[a.key] || a.does; });
-  const NEEDS = { 'partner-finder': 'Needs a Google key', 'local-search-check': 'Needs a Google key', 'review-watch': 'Needs a Google key', 'own-permits': 'Needs Gmail connected' };
+  const NEEDS = { 'review-watch': 'Needs a Google key', 'own-permits': 'Needs Gmail connected', 'pay-bills': 'Needs your books connected' };
   // What each agent keeps an eye on, for the owner's agent list.
-  const WATCHES = { 'where-to-find-work': 'homes near you', 'quotes': 'measured jobs', 'supplier-costs': 'your supplier cost sheet', 'quick-capture': 'photos and notes from site', 'price-book': 'your past quotes', 'install-scheduler': 'glass on order', 'builder-engine': 'new project approvals', 'partner-finder': 'designers and showrooms nearby', 'local-search-check': 'your Google Maps spot', 'lost-quote-revival': 'archived quotes', 'morning-brief': 'today\u2019s work', 'lead-catcher': 'new enquiries', 'quote-prep': 'site visits', 'quote-chaser': 'open quotes', 'yes-to-install': 'approved quotes', 'bill-it': 'finished jobs', 'get-paid': 'overdue invoices', 'review-ask': 'customers who just paid', 'come-back': 'past clients' };
+  const WATCHES = { 'where-to-find-work': 'homes near you', 'quotes': 'jobs you have visited', 'supplier-costs': 'your supplier cost sheet', 'quick-capture': 'photos and notes from site', 'price-book': 'your past quotes', 'install-scheduler': 'approved work waiting on a day', 'builder-engine': 'builders with new projects', 'partner-finder': 'local businesses nearby', 'local-search-check': 'your Google Maps spot', 'lost-quote-revival': 'archived quotes', 'morning-brief': 'today\u2019s work', 'lead-catcher': 'new enquiries', 'quote-prep': 'site visits', 'quote-chaser': 'open quotes', 'yes-to-install': 'approved quotes', 'bill-it': 'finished jobs', 'get-paid': 'overdue invoices', 'review-ask': 'customers who just paid', 'come-back': 'past clients' };
   const ERRS = {};       // board errors seen this session
   const SETUP = {};      // setup/<step>: {done, at}
   const TASKS = {};      // tasks/<id>: {done, at}
@@ -663,6 +667,27 @@
   // The shop's own details, saved by the first time setup (settings/profile).
   // The shop's wider area for copy like 'across ...': profile region, else the town, else 'your area'.
   const region = () => { const p = SETTINGS.profile || {}; return String(p.region || '').trim() || String(p.place || '').split(',')[0].trim() || 'your area'; };
+  // The shop's trade and its own words for what it does. Nothing here assumes a trade: a shop with no trade saved gets plain wording.
+  const tradeOf = () => { const p = SETTINGS.profile || {}; return String(p.trade || (/glass|glazing/i.test(String(p.business || '')) ? 'glass' : '')).trim().toLowerCase(); };
+  const isGlass = () => /glass|glazing/.test(tradeOf());
+  const servicesOf = () => { const p = SETTINGS.profile || {}; const s = Array.isArray(p.services) ? p.services.filter(Boolean).join(', ') : String(p.services || '').trim(); return s || (isGlass() ? 'shower glass, mirrors and windows' : ''); };
+  const w = {
+    get weDo() { const s = servicesOf(); return s ? 'We do ' + s : 'We work'; },
+    get services() { return servicesOf() || 'work like ours'; },
+    get kind() { return isGlass() ? 'glass shop' : (tradeOf() ? tradeOf() + ' company' : 'contractor'); }
+  };
+  // The Flowzyn connector, when this account has it. Used for Operator hand offs and for the shop profile.
+  async function toFlowzyn(tool, input) {
+    try {
+      const mcp = await Promise.race([getMcp(), new Promise((r) => setTimeout(() => r(null), 4000))]);
+      if (!mcp) return null;
+      for (const s of ['flowzyn', 'Flowzyn']) {
+        try { const res = await mcp.callTool(s, tool, input || {}); let p = res && res.payload; if (typeof p === 'string') { try { p = JSON.parse(p); } catch (e) { /* text */ } } return p == null ? true : p; }
+        catch (e) { /* try the other name */ }
+      }
+    } catch (e) { /* not connected */ }
+    return null;
+  }
   const me = () => {
     const p = SETTINGS.profile || {};
     const owner = String(p.owner || '').trim();
@@ -720,7 +745,11 @@
     if (!isOperator()) {
       const ownNeed = window.FZ && window.FZ.AGENT_NEEDS && window.FZ.AGENT_NEEDS[a.key];
       if (a.status === 'setup' && NEEDS[a.key] && !(ownNeed && window.FZ.setupDone && window.FZ.setupDone(ownNeed, SETUP))) return { tone: 'amber', label: 'Needs setup', sub: NEEDS[a.key], tip: 'Switches on once this is connected' };
+      // Running means a run is on record. Before the first one, say so plainly.
+      const ran = r && r.last;
       if (a.access === 'tap') return { tone: 'green', label: 'Running', sub: 'Lines it up, you tap once in Jobber', tip: 'Jobber does not let agents create this record, so you finish it in one tap' };
+      if (!ran) return { tone: 'grey', label: 'Ready', sub: 'Starts with your next morning run', tip: 'No run on record yet' };
+      if (r.lastStatus === 'error') return { tone: 'amber', label: 'Needs a look', sub: 'Last run hit a problem', tip: 'Flowzyn has been told' };
       const nx = (s && s.scheduled && s.nextRun && new Date(s.nextRun) > new Date()) ? (dayKey(s.nextRun) === dayKey(new Date().toISOString()) ? 'today' : fmtDay(s.nextRun).split(',')[0]) + ' ' + fmtTime(s.nextRun) : nextRun((s && s.scheduled && s.schedule) || SCHEDULE[a.key]);
       return { tone: 'green', label: 'Running', sub: nx ? 'Next run ' + nx : 'Runs when work comes in', tip: 'Runs on its own' + (SCHEDULE[a.key] ? ', ' + SCHEDULE[a.key] : '') };
     }
@@ -781,13 +810,13 @@
       : ' agents running' + (String((SETTINGS.profile || {}).business || '').trim() ? ' for ' + me().business : '') + '. Each board reads Jobber live.');
     if (sum && !isOperator()) sum.replaceChildren(...[
       h('span', { class: 'chip' }, h('span', { class: 'dot green' }), counts.green + ' running'),
-      counts.green < nOn ? h('span', { class: 'chip' }, h('span', { class: 'dot grey' }), (nOn - counts.green) + ' paused') : null,
+      counts.green < nOn ? h('span', { class: 'chip' }, h('span', { class: 'dot grey' }), (nOn - counts.green) + ' not running yet') : null,
       fires ? h('span', { class: 'chip' }, plural(fires, 'run') + ' this week') : null].filter(Boolean));
     else if (sum) sum.replaceChildren(...[
       h('span', { class: 'chip' }, h('span', { class: 'dot green' }), counts.green + ' on a schedule'),
       counts.amber ? h('span', { class: 'chip' }, h('span', { class: 'dot amber' }), counts.amber + ' live view only') : null,
       counts.red ? h('span', { class: 'chip' }, h('span', { class: 'dot red' }), plural(counts.red, 'error')) : null,
-      counts.grey ? h('span', { class: 'chip' }, h('span', { class: 'dot grey' }), counts.grey + ' paused') : null,
+      counts.grey ? h('span', { class: 'chip' }, h('span', { class: 'dot grey' }), counts.grey + ' not running yet') : null,
       h('span', { class: 'chip' }, plural(fires, 'run') + ' this week')].filter(Boolean));
     repaintDesk();
   }
@@ -950,6 +979,8 @@
       if (hand) {
         const ex = { agent: hand.agent || null, title: hand.title, detail: [hand.meta, (hand.approved ? 'Approved by ' : 'Handed over by ') + me().first].filter(Boolean).join(' · '), approved: !!hand.approved, draft: hand.draft || null, link: hand.link || null, createdAt: at, status: 'open', from: 'owner' };
         await db.doc('exceptions/task-' + id).set(ex); EXC['task-' + id] = Object.assign({ id: 'task-' + id }, ex);
+        // Handed to the Operator: tell Flowzyn through the connector, so a person sees it. The record and its link, no contact details.
+        if (!hand.approved) toFlowzyn('hand_to_operator', { agent: (byKey(hand.agent) || {}).name || undefined, what: [hand.title, hand.meta, hand.link].filter(Boolean).join(' \u00b7 ').slice(0, 600), urgency: 'today' });
       }
       const rec = { done: on, at }; if (hand) rec.handed = true;
       await db.doc('tasks/' + id).set(rec); TASKS[id] = rec; paintBell(); return true;
@@ -1226,13 +1257,47 @@
     util.append(b);
   }
 
+  // Schedule Installs is one agent from the customer's yes to the booked day (Matt, Nov 8). The yes list and supplier
+  // order come first, then the delivery and booking board, on one page.
+  function mergeScheduleInstalls() {
+    const IS = BOARDS['install-scheduler'], YI = BOARDS['yes-to-install'];
+    if (!IS || !YI || IS.merged) return;
+    const own = IS.render;
+    IS.merged = true;
+    IS.render = async function (ctx, a) {
+      const safe = (p) => Promise.resolve().then(p).then((x) => [].concat(x || []).filter(Boolean)).catch((e) => { console.error(e); return []; });
+      const [yes, rest] = await Promise.all([safe(() => YI.render(ctx, byKey('yes-to-install'))), safe(() => own.call(IS, ctx, a))]);
+      if (!yes.length) return rest;
+      // One headline on the page: the second part's headline becomes a quiet lead line.
+      rest.forEach((n) => { if (n.classList && n.classList.contains('fz-status')) { n.classList.remove('fz-status'); n.classList.add('qj-lead'); } });
+      return yes.concat(rest);
+    };
+  }
+
   let DBOK = false;
   async function start() {
     // Read the shop profile before the first screen so new shops start at the first time setup.
     try {
       const db = await Promise.race([getDb(), new Promise((r) => setTimeout(() => r(null), 4000))]);
       if (db) { DBOK = true; const p = await store('settings/profile'); if (p) SETTINGS.profile = p; const aa = await store('settings/autoapprove').catch(() => null); if (aa) SETTINGS.autoapprove = aa; }
+      // Set up Flowzyn already asked the owner who they are. Take the profile from there, so this app never asks again.
+      const cur = SETTINGS.profile || {};
+      if (db && (!cur.onboardedAt || !cur.trade || !cur.timeZone)) {
+        const st = await Promise.race([toFlowzyn('flowzyn_status', {}), new Promise((r) => setTimeout(() => r(null), 3500))]);
+        const fp = st && typeof st === 'object' && st.profile;
+        if (fp && fp.business) {
+          const from = { business: fp.business, owner: fp.owner || fp.ownerFirstName || '', place: fp.place || '', website: fp.website || '', trade: fp.trade || '', services: fp.services || '', timeZone: fp.timeZone || '' };
+          const next = Object.assign({}, cur);
+          Object.keys(from).forEach((k) => { if (!String(next[k] || '').trim() && from[k]) next[k] = from[k]; });
+          if (!next.onboardedAt && next.business && next.owner) { next.onboardedAt = new Date().toISOString(); next.welcomeStep = null; }
+          if (JSON.stringify(next) !== JSON.stringify(cur)) { try { await db.doc('settings/profile').set(next); SETTINGS.profile = next; } catch (e) { /* stays as it was */ } }
+        }
+      }
+      if (SETTINGS.profile && SETTINGS.profile.timeZone) { try { new Intl.DateTimeFormat('en-US', { timeZone: SETTINGS.profile.timeZone }); TZ = SETTINGS.profile.timeZone; } catch (e) { /* keep the default */ } }
     } catch (e) { /* the app still works without a profile */ }
+    mergeScheduleInstalls();
+    // The owner's own email templates, before any board writes a draft.
+    try { if (window.FZ.tpl && window.FZ.tpl.load) await Promise.race([window.FZ.tpl.load(), new Promise((r) => setTimeout(r, 3000))]); } catch (e) { /* default wording */ }
     paintProfile();
     // Flowzyn admin controls show only to editors of this page (Flowzyn), never to the shop.
     try { const u = await Promise.race([window.claude && window.claude.use ? window.claude.use('user') : null, new Promise((r) => setTimeout(() => r(null), 3000))]); window.FZ.CAN_EDIT = !!(u && await u.canEdit()); } catch (e) { window.FZ.CAN_EDIT = false; }
@@ -1265,7 +1330,7 @@
   // The few decisions the owner sees today: calls, checks and bookings weigh more. The rest is the Operator's.
   const OWNER_KINDS = { 'Call': 2, 'Check': 2, 'Book it': 1.5 };
   // Auto approve (Matt, Nov 7): the owner turns it on once per sending agent, and those emails go out on the next run without a tap each.
-  const SENDERS = { 'builder-engine': 'Builder intros', 'partner-finder': 'Partner intros', 'lost-quote-revival': 'Win back offers on old quotes', 'lead-catcher': 'Replies to new enquiries', 'quote-chaser': 'Quote follow ups', 'yes-to-install': 'Glass orders to your supplier', 'get-paid': 'Payment reminders', 'review-ask': 'Review asks', 'come-back': 'Check ins with past customers' };
+  const SENDERS = { 'builder-engine': 'Builder intros', 'partner-finder': 'Partner intros', 'lost-quote-revival': 'Win back offers on old quotes', 'lead-catcher': 'Replies to new enquiries', 'quote-chaser': 'Quote follow ups', 'yes-to-install': 'Orders to your supplier', 'get-paid': 'Payment reminders', 'review-ask': 'Review asks', 'come-back': 'Check ins with past customers' };
   const autoOn = (k) => !!(SETTINGS.autoapprove && SETTINGS.autoapprove.agents && SETTINGS.autoapprove.agents[k]);
   const autoSkips = (t) => !!(t && t.draft && autoOn(t.agent));
   const autoSet = async (patch) => { const db = await getDb(); if (!db) return false; const cur = SETTINGS.autoapprove || {}; const next = { agents: Object.assign({}, cur.agents || {}, patch), by: me().owner || me().first, at: new Date().toISOString() }; try { await db.doc('settings/autoapprove').set(next); SETTINGS.autoapprove = next; return true; } catch (e) { return false; } };
@@ -1308,7 +1373,7 @@
   // The goal each core agent works toward, for the Overview.
   // The action tab says exactly what the owner does there.
   const WORKTAB = { 'where-to-find-work': 'Areas to go after', 'quotes': 'To quote', 'supplier-costs': 'Check costs', 'quick-capture': 'Captured from site', 'price-book': 'Check the price book', 'install-scheduler': 'Line up installs', 'builder-engine': 'Email builders', 'lost-quote-revival': 'Send win back offers', 'partner-finder': 'Send partner intros', 'local-search-check': 'Fix your listings', 'morning-brief': 'Approve today', 'lead-catcher': 'Reply to enquiries', 'quote-prep': 'Approve quotes', 'quote-chaser': 'Send follow ups', 'yes-to-install': 'Order and book jobs', 'bill-it': 'Send invoices', 'get-paid': 'Send payment reminders', 'review-ask': 'Request customer reviews', 'come-back': 'Invite past customers back', 'review-watch': 'Reply to reviews' };
-  const GOALS = {"where-to-find-work": "Know which neighbourhoods to go after next, and why.", "quotes": "Every measured job quoted within 2 days, priced the same way.", "supplier-costs": "Price every quote from what the glass really costs you.", "quick-capture": "Nothing asked for on site gets forgotten.", "price-book": "Price every shower and mirror quote the same way, from the sizes.", "install-scheduler": "Book every install within a day of the glass landing.", "builder-engine": "Win new jobs from builders whose projects just got approved near you.", "lost-quote-revival": "Win back jobs from quotes you gave up on.", "partner-finder": "Get designers, showrooms and rental managers sending you work.", "local-search-check": "Get found first when people nearby search for your work.", "morning-brief": "Know what needs your OK each day in under 3 minutes.", "lead-catcher": "Reply to every new enquiry within a day, so you win the job before a competitor does.", "quote-prep": "Get every quote out within 2 days of the site visit.", "quote-chaser": "Win more of the quotes you already sent.", "yes-to-install": "Book every yes within a week, so no approved job goes cold.", "week-board": "Keep every crew busy and every job on time.", "bill-it": "Never miss an invoice: every finished job flagged the day it is done.", "get-paid": "Get overdue money in without awkward calls.", "month-close": "Close the books by day 3 every month.", "weather-watch": "Move jobs before the weather does, not after.", "crew-sheet": "Send every crew out with everything they need, so nobody drives back.", "cash-in": "Know exactly what money is coming in over the next 30 days.", "pay-bills": "Pay every supplier on time, and only once.", "price-watch": "Keep every price above your cost and margin.", "own-permits": "Get inspections passed fast so final invoices go out.", "add-on-finder": "Add the extras that belong on every quote.", "shop-handbook": "Price and describe the same work the same way every time.", "review-ask": "Get more Google reviews every month.", "review-watch": "Answer every review within 48 hours and stay ahead of nearby shops.", "builder-keep": "Keep your best builders sending you work.", "come-back": "Win repeat work from past customers.", "stand-behind-it": "Catch warranty problems before the customer has to call."};
+  const GOALS = {"where-to-find-work": "Know which neighbourhoods to go after next, and why.", "quotes": "Every job you have visited quoted within 2 days, priced the same way.", "supplier-costs": "Price every quote from what the glass really costs you.", "quick-capture": "Nothing asked for on site gets forgotten.", "price-book": "Price every shower and mirror quote the same way, from the sizes.", "install-scheduler": "Book every yes within a week, and the work within a day of the delivery landing.", "builder-engine": "Win new jobs from builders whose projects just got approved near you.", "lost-quote-revival": "Win back jobs from quotes you gave up on.", "partner-finder": "Get local businesses sending you work.", "local-search-check": "Get found first when people nearby search for your work.", "morning-brief": "Know what needs your OK each day in under 3 minutes.", "lead-catcher": "Reply to every new enquiry within a day, so you win the job before a competitor does.", "quote-prep": "Get every quote out within 2 days of the site visit.", "quote-chaser": "Win more of the quotes you already sent.", "yes-to-install": "Book every yes within a week, so no approved job goes cold.", "week-board": "Keep every crew busy and every job on time.", "bill-it": "Never miss an invoice: every finished job flagged the day it is done.", "get-paid": "Get overdue money in without awkward calls.", "month-close": "Close the books by day 3 every month.", "weather-watch": "Move jobs before the weather does, not after.", "crew-sheet": "Send every crew out with everything they need, so nobody drives back.", "cash-in": "Know exactly what money is coming in over the next 30 days.", "pay-bills": "Pay every supplier on time, and only once.", "price-watch": "Keep every price above your cost and margin.", "own-permits": "Get inspections passed fast so final invoices go out.", "add-on-finder": "Add the extras that belong on every quote.", "shop-handbook": "Price and describe the same work the same way every time.", "review-ask": "Get more Google reviews every month.", "review-watch": "Answer every review within 48 hours and stay ahead of nearby shops.", "builder-keep": "Keep your best builders sending you work.", "come-back": "Win repeat work from past customers.", "stand-behind-it": "Catch warranty problems before the customer has to call."};
   const metricOf = (k) => METRICS[k] || stored[k] || null;
-  window.FZ = Object.assign(window.FZ || {}, { openBoard: (k) => openBoard(k), auto: { SENDERS, on: autoOn, set: autoSet, skips: autoSkips }, BOARDS, GOALS, metricOf, opButton, hasOperator, offerOperator, ownerPicks, saveTask: (id, on, hand) => saveTask(id, on, hand), queueSend: (id, ob) => queueSend(id, ob), tasksNow: () => ({ list: TASKLIST, done: TASKS }), isOperator, opName, opWho, CORE, me, profile: () => SETTINGS.profile || {}, saveProfile: async (patch) => { const db = await getDb(); if (!db) return false; const next = Object.assign({}, SETTINGS.profile || {}, patch); try { await db.doc('settings/profile').set(next); SETTINGS.profile = next; return true; } catch (e) { return false; } }, opUrl: (f) => opUrl(f), biz: () => me().business, town: () => me().town, region: () => region(), sign: () => me().first + ', ' + me().business, rerunWelcome: async () => { const db = await getDb(); if (!db) return false; const next = Object.assign({}, SETTINGS.profile || {}, { onboardedAt: null }); try { await db.doc('settings/profile').set(next); SETTINGS.profile = next; location.hash = '#welcome'; return true; } catch (e) { return false; } }, operatorBanner, setView, board, start, ctx, GROUPS, AGENTS, byKey, ui, fmt, health: (a) => health(a), locked: (a) => locked(a), plan: () => plan(), openExc: (k) => openExc(k), runs, settings });
+  window.FZ = Object.assign(window.FZ || {}, { openBoard: (k) => openBoard(k), auto: { SENDERS, on: autoOn, set: autoSet, skips: autoSkips }, BOARDS, GOALS, metricOf, opButton, hasOperator, offerOperator, ownerPicks, saveTask: (id, on, hand) => saveTask(id, on, hand), queueSend: (id, ob) => queueSend(id, ob), tasksNow: () => ({ list: TASKLIST, done: TASKS }), isOperator, opName, opWho, CORE, me, profile: () => SETTINGS.profile || {}, saveProfile: async (patch) => { const db = await getDb(); if (!db) return false; const next = Object.assign({}, SETTINGS.profile || {}, patch); try { await db.doc('settings/profile').set(next); SETTINGS.profile = next; return true; } catch (e) { return false; } }, opUrl: (f) => opUrl(f), biz: () => me().business, town: () => me().town, w, isGlass, trade: tradeOf, toFlowzyn, shown, region: () => region(), sign: () => me().first + ', ' + me().business, rerunWelcome: async () => { const db = await getDb(); if (!db) return false; const next = Object.assign({}, SETTINGS.profile || {}, { onboardedAt: null }); try { await db.doc('settings/profile').set(next); SETTINGS.profile = next; location.hash = '#welcome'; return true; } catch (e) { return false; } }, operatorBanner, setView, board, start, ctx, GROUPS, AGENTS, byKey, ui, fmt, health: (a) => health(a), locked: (a) => locked(a), plan: () => plan(), openExc: (k) => openExc(k), runs, settings });
 })();

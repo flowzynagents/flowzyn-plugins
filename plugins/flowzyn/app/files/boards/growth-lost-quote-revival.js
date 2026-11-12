@@ -22,15 +22,15 @@ FZ.board('lost-quote-revival', {
     // Season by today's month in Mountain time.
     const month = Number(fmt.dayKey(new Date().toISOString()).slice(5, 7));
     const season = month === 12 || month <= 3 ? 'winter' : month <= 5 ? 'spring' : month <= 8 ? 'summer' : 'fall';
-    const kindOf = (t) => /window|door/i.test(t) ? 'windows' : /shower|mirror|bath/i.test(t) ? 'inside' : /builder|package|commercial/i.test(t) ? 'builder' : 'inside';
+    const kindOf = (t) => (FZ.isGlass() && /window|door/i.test(t)) ? 'windows' : /builder|package|commercial/i.test(t) ? 'builder' : 'inside';
     const LINES = {
-      fall: { windows: 'With winter coming, now is a good time to get new windows in before the cold sets in.', inside: 'We still have room on the calendar before the holidays if you would like it done before family visits.', builder: 'If the project is moving again, we can get you on the schedule before ski season gets busy.' },
-      winter: { windows: 'Winter is a good time to plan windows so we can install as soon as the weather opens up.', inside: 'Winter is a quieter stretch for indoor work, so we can usually get to you quickly.', builder: 'If the project is back on for spring, I would love to get your glass on the calendar early.' },
-      spring: { windows: 'Spring is a great time for new glass before the summer rental season.', inside: 'If you want it done before summer guests arrive, now is the time.', builder: 'Spring starts are filling up and I want to make sure your glass is ready on time.' },
-      summer: { windows: 'Summer is our best weather for windows and we have a few openings.', inside: 'We have a few openings this summer if you would still like it done.', builder: 'If the project picked back up, we can still fit your glass in this season.' }
+      fall: { windows: 'With winter coming, now is a good time to get new windows in before the cold sets in.', inside: 'We still have room on the calendar before the holidays if you would like it done before family visits.', builder: 'If the project is moving again, we can get you on the schedule before the year gets busy.' },
+      winter: { windows: 'Winter is a good time to plan windows so we can install as soon as the weather opens up.', inside: 'Winter is a quieter stretch for indoor work, so we can usually get to you quickly.', builder: 'If the project is back on for spring, I would love to get you on the calendar early.' },
+      spring: { windows: 'Spring is a great time to get new windows in before summer.', inside: 'If you want it done before summer guests arrive, now is the time.', builder: 'Spring starts are filling up and I want to make sure we are ready for yours on time.' },
+      summer: { windows: 'Summer is our best weather for windows and we have a few openings.', inside: 'We have a few openings this summer if you would still like it done.', builder: 'If the project picked back up, we can still fit you in this season.' }
     };
     const monthYear = (iso) => new Date(iso).toLocaleDateString('en-US', { timeZone: fmt.TZ, month: 'long', year: 'numeric' });
-    const draft = (r) => 'Hi ' + fmt.firstName(r.who) + ',\n\n' +
+    const draft = (r) => FZ.tpl.body('win-back', { 'first name': fmt.firstName(r.who), month: monthYear(r.q.createdAt), work: fmt.clean(r.q.title).toLowerCase().replace(/\s*quote$/, ''), 'for work': (fmt.clean(r.q.title) ? 'your ' + fmt.clean(r.q.title).toLowerCase().replace(/\s*quote$/, '') : 'you'), amount: fmt.money(r.total) }, season + '.' + kindOf(r.q.title), draft0(r)), draft0 = (r) => 'Hi ' + fmt.firstName(r.who) + ',\n\n' +
       'It is ' + FZ.me().first + ' at ' + FZ.biz() + '. Back in ' + monthYear(r.q.createdAt) + ' we put together a quote for ' + (fmt.clean(r.q.title) ? 'your ' + fmt.clean(r.q.title).toLowerCase().replace(/\s*quote$/, '') : 'you') + ' (' + fmt.money(r.total) + '). ' + LINES[season][kindOf(r.q.title)] + '\n\n' +
       'If it is still on your list, I am happy to refresh the numbers or come take another look. Just reply here and we will set it up.\n\n' +
       FZ.sign();
@@ -60,7 +60,7 @@ FZ.board('lost-quote-revival', {
           'Quotes newer than 2 months stay with Chase Quotes',
           'Checked again on every run'
         ]),
-        K.example(h, '$8.5k went quiet in the last 2 months', [h('div', { class: 'lq-strip viz' }, cellStrip(ex, 7800), h('p', { class: 'lq-key' }, 'Made up for a glass shop. Your own quotes replace this.'), h('style', null, LQ_CSS))])));
+        K.example(h, '$8.5k went quiet in the last 2 months', [h('div', { class: 'lq-strip viz' }, cellStrip(ex, 7800), h('p', { class: 'lq-key' }, 'Made up. Your own quotes replace this.'), h('style', null, LQ_CSS))])));
       out.push(ui.how('Looks at every Jobber quote marked archived and last touched 60 to 365 days ago.'));
       return out;
     }

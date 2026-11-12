@@ -14,7 +14,7 @@
     const p = doc || {};
     const groups = { growth: true, run: true, keep: true };
     const price = Number(p.price) || PRICE;
-    return { groups, operator: p.operator === true, startedAt: p.startedAt || null, price, fee: price, pilotDays: 0, client: p.client || 'dunlap-glass', invoices: Array.isArray(p.invoices) ? p.invoices : [] };
+    return { groups, operator: p.operator === true, startedAt: p.startedAt || null, price, fee: price, pilotDays: 0, client: p.client || '', invoices: Array.isArray(p.invoices) ? p.invoices : [] };
   };
   // What the plan costs in a given month counted from the start (0 is the first month).
   FZ.planFeeAt = (plan) => (plan && plan.price) || PRICE;

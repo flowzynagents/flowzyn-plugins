@@ -153,6 +153,9 @@ FZ.board('get-paid', {
     return out;
 
     function nudge(r) {
+      return FZ.tpl.body('payment-reminder', { 'first name': fmt.firstName(r.who), invoice: r.v.invoiceNumber, amount: fmt.money(r.bal), 'due date': fmt.fmtDate(r.v.dueDate || r.v.issuedDate) }, null, nudge0(r));
+    }
+    function nudge0(r) {
       return 'Hi ' + fmt.firstName(r.who) + ',\n\nHope all is well since we finished up. A quick note that invoice #' + r.v.invoiceNumber + ' for ' + fmt.money(r.bal) +
         ' was due ' + fmt.fmtDate(r.v.dueDate || r.v.issuedDate) + '. You can pay it online from the invoice email, or just reply and I can take a card over the phone.\n\nIf it is already on its way, thank you and please ignore this.\n\n' + FZ.sign();
     }

@@ -5,15 +5,10 @@ boards/growth-builder-engine.js
 boards/growth-local-search-check.js
 boards/growth-lost-quote-revival.js
 boards/growth-partner-finder.js
-boards/keep-builder-keep.js
 boards/keep-come-back.js
 boards/keep-review-ask.js
-boards/keep-review-watch.js
-boards/keep-stand-behind-it.js
 boards/run-add-on-finder.js
 boards/run-bill-it.js
-boards/run-cash-in.js
-boards/run-crew-sheet.js
 boards/run-get-paid.js
 boards/run-install-scheduler.js
 boards/run-lead-catcher.js
@@ -28,7 +23,6 @@ boards/run-quote-chaser.js
 boards/run-quote-prep.js
 boards/run-quotes.js
 boards/run-replies.js
-boards/run-shop-handbook.js
 boards/run-supplier-costs.js
 boards/run-weather-watch.js
 boards/run-week-board.js

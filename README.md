@@ -2,7 +2,7 @@
 
 This folder becomes its own GitHub repo (suggested `flowzynagents/flowzyn-plugins`). Shops add it in Claude under Customize, Plugins, Add marketplace.
 
-Assume anyone can read it. It holds only thin skills that point at the Flowzyn connector. The agent instructions, keys and licence live in the connector (private repo `flowzynagents/flowzyn-connector`), which only answers shops with an active Flowzyn licence.
+Assume anyone can read it. It holds thin skills that point at the Flowzyn connector, and the shop's copy of the agents app (`plugins/flowzyn/app`, the screens only). The agent run steps, keys and licence live in the connector (private repo `flowzynagents/flowzyn-connector`), which only answers shops with an active Flowzyn licence. Without a licence the skills do nothing and the app is a read only view of the shop's own Jobber.
 
 ## What a shop installs
 `flowzyn` plugin:

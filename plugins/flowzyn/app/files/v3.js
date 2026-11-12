@@ -43,7 +43,7 @@
   const TAPGROUP = { 'bill-it': 'jobber', 'quotes': 'quote', 'local-search-check': 'google' };
   const GROUPS = [['send', 'Read and send'], ['quote', 'Quote it'], ['jobber', 'In Jobber'], ['google', 'On Google']];
   // The words on each task row.
-  const VERB = { 'quote-chaser': 'Follow up', 'get-paid': 'Remind', 'lead-catcher': 'Reply to', 'review-ask': 'Review ask,', 'come-back': 'Check in with', 'lost-quote-revival': 'Win back', 'partner-finder': 'Intro to', 'builder-engine': 'Intro to', 'yes-to-install': 'Glass order,' };
+  const VERB = { 'quote-chaser': 'Follow up', 'get-paid': 'Remind', 'lead-catcher': 'Reply to', 'review-ask': 'Review ask,', 'come-back': 'Check in with', 'lost-quote-revival': 'Win back', 'partner-finder': 'Intro to', 'builder-engine': 'Intro to', 'yes-to-install': 'Supplier order,' };
   const nameOf = (k) => ((FZ.byKey(k) || {}).name || '').replace(/ Agent$/, '');
   const slug = (s) => String(s || '').replace(/[^A-Za-z0-9]+/g, '-').slice(-80);
   const short = (n) => fmt.money(n, { short: true });
@@ -133,7 +133,7 @@
     s.rows.forEach((r) => {
       if (r.stage === 'dated') {
         const two = s.freeDays(r.p.delivery, 2);
-        out.push({ id: 'is-ask-' + slug(r.j.id), agent: 'install-scheduler', src: 'install-scheduler', tap: 'send', who: r.who, title: 'Ask ' + s.nm(r) + ' which day', amount: r.total, reason: 'Glass lands ' + s.nice(r.p.delivery) + '. Free: ' + two.map(s.short).join(' or '),
+        out.push({ id: 'is-ask-' + slug(r.j.id), agent: 'install-scheduler', src: 'install-scheduler', tap: 'send', who: r.who, title: 'Ask ' + s.nm(r) + ' which day', amount: r.total, reason: 'Delivery ' + s.nice(r.p.delivery) + '. Free: ' + two.map(s.short).join(' or '),
           link: r.j.jobberWebUri, draft: { to: '', subject: 'Your install day', body: s.askText(r, two), clientId: r.j.client && r.j.client.id },
           send: async (ob) => (await FZ.queueSend('is-ask-' + slug(r.j.id), Object.assign({ who: r.who, link: r.j.jobberWebUri }, ob))) && s.save(r, { askedAt: new Date().toISOString(), offered: two }) });
       } else if (r.stage === 'asked') {
@@ -203,7 +203,7 @@
     ta.addEventListener('input', fit); requestAnimationFrame(() => requestAnimationFrame(fit));
     const msg = h('p', { class: 'v3-msg', role: 'status' });
     // A glass order with no supplier address yet: say where it gets saved, once, instead of a blank To.
-    if (!d.to && t.src === 'yes-to-install') msg.textContent = 'Save your glass supplier\u2019s order email in Connect, Shop details, and it fills in here every time.';
+    if (!d.to && t.src === 'yes-to-install') msg.textContent = 'Save your supplier\u2019s order email in Connect, Shop details, and it fills in here every time.';
     const ok = btn('Approve and send', async () => {
       const addr = to.value.trim();
       if (!isoOK(addr)) { msg.textContent = 'Add the email address it goes to first.'; to.focus(); return; }
@@ -585,8 +585,8 @@
     const all = s ? s.rows : [];
     const rows = all.filter(orderedJob);
     const toOrder = all.filter((r) => !orderedJob(r));
-    const yesRows = (extra && extra.cap.cards || []).filter((c) => /Not a job yet/.test(c.when || '')).concat(toOrder.map((r) => ({ who: r.who + ' · job #' + r.j.jobNumber, amount: r.total, when: 'Job, no glass order yet' })));
-    const STEPS = ['Order glass', 'Glass coming', 'Customer asked', 'Day set'];
+    const yesRows = (extra && extra.cap.cards || []).filter((c) => /Not a job yet/.test(c.when || '')).concat(toOrder.map((r) => ({ who: r.who + ' · job #' + r.j.jobNumber, amount: r.total, when: 'Job, no supplier order yet' })));
+    const STEPS = ['Order from supplier', 'Delivery coming', 'Customer asked', 'Day set'];
     const at = (r) => ({ waiting: 1, dated: 2, asked: 2, picked: 3 })[r.stage] + (r.p && r.p.setAt ? 1 : 0);
     const cnt = [yesRows.length, rows.filter((r) => r.stage === 'waiting').length, rows.filter((r) => r.stage === 'dated' || r.stage === 'asked').length, rows.filter((r) => r.stage === 'picked').length];
     const steps = el('div', 'v3-steps', ...STEPS.map((l, i) => el('div', cnt[i] && i !== 1 ? 'hot' : null, h('b', null, String(cnt[i])), h('span', null, l))));
@@ -625,7 +625,7 @@
         chosen.replaceChildren(el('div', 'v3-pick', el('div', null, h('b', null, c.name), h('span', null, prop ? prop.label + ' · from Jobber' + (props.length > 1 ? ', ' + props.length + ' addresses, the first is used' : '') : 'No address on file. Add one in Jobber first.')), prop ? h('span', { class: 'v3-ok' }, '✓') : null));
       }); return b2; }) : [h('p', { class: 'v3-calm' }, 'No customer by that name in Jobber.')]));
     }, 300); });
-    const what = h('input', { type: 'text', placeholder: 'Mirror for the primary closet', 'aria-label': 'What they asked for' });
+    const what = h('input', { type: 'text', placeholder: 'What they want, in a few words', 'aria-label': 'What they asked for' });
     const sizes = h('input', { type: 'text', placeholder: '44 x 30', 'aria-label': 'Sizes in inches' });
     const preview = h('p', { class: 'v3-note' });
     const lines = () => A.linesFor(what.value + ' ' + sizes.value, book);
@@ -663,7 +663,7 @@
       } catch (e) { goBtn.disabled = photoBtn.disabled = false; msg.textContent = 'Jobber did not take it: ' + ((e && e.message) || 'try again') + '.'; }
     });
     form.append(h('label', null, 'Customer', q), picks, chosen, h('label', null, 'What they asked for', what), h('label', null, 'Sizes in inches', sizes), preview,
-      el('div', 'v3-btns', photoBtn, goBtn), file, msg, h('p', { class: 'v3-note' }, 'No sizes yet? Leave it blank and it saves the request only. The same works from Claude on your phone: say “Quote a 44 x 30 mirror for Jake at Monroe St”.'));
+      el('div', 'v3-btns', photoBtn, goBtn), file, msg, h('p', { class: 'v3-note' }, 'No sizes yet? Leave it blank and it saves the request only. The same works from Claude on your phone: say “Add a request for Jake at Monroe St”.'));
     box.replaceChildren(el('div', 'v3p',
       head(h('p', { class: 'v3-eb' }, h('span', { class: 'tag run' }, 'RUN'), 'QUOTE JOBS · CAPTURE'), ['Capture a ', { b: 'site request' }, '.'], 'Takes 20 seconds. Nothing goes to the customer.'),
       form, h('button', { type: 'button', class: 'v3-back', onclick: () => { location.hash = '#a-quotes'; } }, '← Back to Quote Jobs')));

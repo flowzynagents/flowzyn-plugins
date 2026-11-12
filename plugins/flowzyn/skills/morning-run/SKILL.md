@@ -5,12 +5,25 @@ description: Use for "Run the Flowzyn morning run" (the daily scheduled task) or
 
 # Flowzyn morning run
 
+Nobody is watching this run. Do it end to end and never stop to ask. Keep it small: read only what each agent's steps need.
+
+## 1. Start
 1. Call `flowzyn_status`. If it errors, stop and tell the owner what it says. If `systems` is not set, run the Set up Flowzyn skill instead.
 2. Use the install-app skill to check the Flowzyn app is current. It only acts when this plugin carries a newer version.
-3. For each agent in `agentsOn`, in the order given:
-   - Call `get_agent_instructions` with the agent's name. Follow those instructions exactly. They are the current version and win over anything remembered.
-   - Use only the shop's own connectors listed in `systems.connected`.
-   - Never send anything to a customer unless the instructions and the shop's auto approve setting allow it. Otherwise leave a draft.
-   - End with `log_run`: one plain summary line, counts, and any exceptions. No customer contact details.
-4. Anything an agent could not do goes to `hand_to_operator` with urgency.
-5. Finish with the morning brief the instructions describe, in plain words, biggest dollars first.
+3. Find the owner's "Flowzyn Agents" app (list their artifacts) and note its link. Its storage is where the agents and the app meet. Read `settings/profile`, `settings/autoapprove`, `settings/templates` and list `agents`, `tasks`, `exceptions` and `runs` once, now, and reuse them for every agent.
+
+## 2. Each agent
+`flowzyn_status` lists the agents in run order, each with its app `key`. For each one that is in `agentsOn`:
+1. Call `get_agent_instructions` with the agent's name. Those are the current steps and win over anything remembered.
+2. Is it due today? The steps say when it runs (every weekday, Mondays, monthly). Skip it when it is not due and `runs/<key>` shows it ran in its last slot. Never skip Plan Today.
+3. Is it paused? If `agents/<key>` has `enabled: false`, log it as skipped and move on.
+4. Follow the steps exactly, using only the shop's own connectors listed in `systems.connected`.
+5. Never send anything to a customer unless the owner approved that email in the app, or auto approve is on for that agent. The steps say how to tell.
+6. End the agent the way its steps say: the run record and metric in the app storage, then `log_run`. Counts only, no customer names or contact details.
+
+One agent failing never stops the run. Log it as an error with one plain line and carry on to the next.
+
+## 3. Finish
+1. Plan Today runs last. It sends every email the owner approved in the app, then writes the brief.
+2. Anything a person at Flowzyn should do goes to `hand_to_operator`, with how soon.
+3. End with the brief in plain words, biggest dollars first, and one line saying how many agents ran. No dashes, no semicolons.

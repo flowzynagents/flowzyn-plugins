@@ -45,7 +45,8 @@ FZ.board('review-ask', {
     const pros = rows.filter((r) => r.co);
 
     const work = (r) => fmt.clean(r.v.subject).toLowerCase() || 'recent work';
-    const draft = (r) => r.co
+    const draft = (r) => FZ.tpl.body(r.co ? 'review-builder' : 'review-homeowner', { 'first name': r.first, work: work(r), 'review link': LINK }, null, draft0(r));
+    const draft0 = (r) => r.co
       ? 'Hi ' + r.first + ',\n\nThanks for bringing us in on the ' + work(r) + '. It was good working with your team.\n\n' +
         'If you have a minute, a short Google review from a builder or manager means a lot to a small shop like ours. Here is the link: ' + LINK + '\n\nThanks again,\n' + FZ.sign()
       : 'Hi ' + r.first + ',\n\nThank you for choosing ' + FZ.biz() + ' for the ' + work(r) + '. I hope you are enjoying it.\n\n' +
