@@ -16,7 +16,8 @@ assert '<script src="core.js"></script>' in t
 t=t.replace('<script src="core.js"></script>','<script src="shop-copy.js"></script><script src="core.js"></script>',1)
 open(p,'w').write(t)
 P
-printf '%s\n' "$VER" > "$OUT/files/VERSION"
+# The artifact host only serves files with an extension, so the app's own copy of the version is version.txt.
+printf '%s\n' "$VER" > "$OUT/files/version.txt"
 printf '%s\n' "$VER" > "$OUT/VERSION"
 cp "$(dirname "$0")/app-capabilities.json" "$OUT/capabilities.json"
 ( cd "$OUT/files" && find . -type f | sed 's#^\./##' | sort ) > "$OUT/FILES"

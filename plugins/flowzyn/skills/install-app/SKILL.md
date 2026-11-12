@@ -14,10 +14,10 @@ The app files ship with this plugin. From this skill's base directory they are i
 - `capabilities.json`: what the app may use
 
 ## 1. Find their app
-List the owner's own artifacts and look for one titled "Flowzyn Agents". If there is one, read its file `VERSION`.
+List the owner's own artifacts and look for one titled "Flowzyn Agents". If there is one, read its file `version.txt`. No such file means it is older than this plugin.
 
 ## 2. Already current?
-If its `VERSION` matches this plugin's `VERSION`, stop. Nothing to do.
+If its `version.txt` matches this plugin's `VERSION`, stop. Nothing to do.
 
 ## 3. New install (no app yet)
 1. Publish every file in `FILES` as a new artifact: each file's `as` is its path from `FILES`, and its `path` is the absolute path of that file under `../../app/files/`. Title "Flowzyn Agents", icon "Grid".
@@ -27,7 +27,7 @@ If its `VERSION` matches this plugin's `VERSION`, stop. Nothing to do.
 
 ## 4. Update (older version)
 1. Read its declaration. If it differs from `capabilities.json`, declare `capabilities.json` first.
-2. Publish every file in `FILES` to the same artifact, patch mode, with the live version as the base version. Remove any file the app has that is not in `FILES` (old pages that are no longer shipped). Their saved settings, goal, templates and finished tasks stay, they live in the app's own storage, not in its files.
+2. Publish every file in `FILES` to the same artifact, patch mode, with the live version as the base version. Remove only `boards/*.js` files the app has that are not in `FILES` (old pages that are no longer shipped). Never remove anything else, such as videos or data files. Their saved settings, goal, templates and finished tasks stay, they live in the app's own storage, not in its files.
 3. If `settings/profile` in the app's storage has no `trade` or no `timeZone`, fill them from `flowzyn_status`, the same way as a new install.
 4. Say one line in the morning brief: "Your Flowzyn app was updated to {VERSION}."
 

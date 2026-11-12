@@ -1,4 +1,3 @@
-VERSION
 activity.js
 agent-rules.js
 boards/growth-builder-engine.js
@@ -40,4 +39,5 @@ tasks.js
 templates.js
 v3.css
 v3.js
+version.txt
 welcome.js
