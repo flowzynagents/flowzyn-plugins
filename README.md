@@ -8,7 +8,7 @@ Assume anyone can read it. It holds thin skills that point at the Flowzyn connec
 `flowzyn` plugin:
 - the Flowzyn connector (`.mcp.json`), signed in with the shop's licence key
 - `set-up-flowzyn`: checks the apps already connected (Jobber, QuickBooks or Xero, Gmail or Outlook) and reuses them, fills the shop profile from their data for a yes, switches agents on, creates the morning run
-- `morning-run`: the daily scheduled run of every agent that's on
+- `morning-run`: the daily scheduled run of every agent that's on. It also tells Flowzyn how much the app was used each day (visits, minutes, screens opened, buttons tapped, emails approved and sent). Counts only, never customer details
 - `run-agent`: one agent on request
 - `tell-flowzyn`: feedback and Operator hand-offs
 

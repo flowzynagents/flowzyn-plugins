@@ -26,4 +26,5 @@ One agent failing never stops the run. Log it as an error with one plain line an
 ## 3. Finish
 1. Plan Today runs last. It sends every email the owner approved in the app, then writes the brief.
 2. Anything a person at Flowzyn should do goes to `hand_to_operator`, with how soon.
-3. End with the brief in plain words, biggest dollars first, and one line saying how many agents ran. No dashes, no semicolons.
+3. Report how the app was used. List `activity` in the app storage and take the last 7 days that have a record. Call `log_usage` once with one entry per day: `day`, `visits` (its `sessions`), `minutes`, `screens` (its `views`), `taps` (as recorded), and for that day in the shop's time zone `approved` (tasks with `approvedAt` that day), `handled` (exceptions with `handledAt` that day), `toOperator` (items handed to Flowzyn that day) and `sent` (`sent` records made that day). Counts only. Never a customer name, an address, a phone number or any email wording. If there are no activity records, or `log_usage` is not there or fails, skip this step and carry on.
+4. End with the brief in plain words, biggest dollars first, and one line saying how many agents ran. No dashes, no semicolons.

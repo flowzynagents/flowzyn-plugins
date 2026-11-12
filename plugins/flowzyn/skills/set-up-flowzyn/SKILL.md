@@ -67,4 +67,4 @@ Run the Flowzyn morning run now, straight away, with the morning-run skill. Don'
 
 The agents app reads Jobber. If the shop's field app is not Jobber, say so in one line: the agents still run every morning and report here in Claude, and the app screens come when their field app is supported.
 
-Then tell the owner, in three lines: which apps Flowzyn is using, which agents are now on (and any waiting on an app, with the app), and that the next morning run is tomorrow at 6:30 am.
+Then tell the owner, in three lines: which apps Flowzyn is using, which agents are now on (and any waiting on an app, with the app), and that the next morning run is tomorrow at 6:30 am. Add one more line: Flowzyn sees counts of what ran and how much the app was used, so we can make it better, and never sees customer details.
