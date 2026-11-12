@@ -13,6 +13,6 @@ Assume anyone can read it. It holds thin skills that point at the Flowzyn connec
 - `tell-flowzyn`: feedback and Operator hand-offs
 
 ## Updating
-Bump `version` in `plugins/flowzyn/.claude-plugin/plugin.json` and push. Shops with Sync automatically get it, others on Check for updates. Agent wording changes don't need a plugin update: deploy the connector.
+Bump `version` in `plugins/flowzyn/.claude-plugin/plugin.json` on a branch and merge it to main with a pull request. Claude only syncs on a merged pull request that bumps the version. A direct push to main does not reach shops. Shops with Sync automatically get it, others on Check for updates. Agent wording changes don't need a plugin update: deploy the connector.
 
 Privacy: https://www.flowzyn.com/privacy (set `privacyPolicyUrl` in plugin.json once that page exists).
