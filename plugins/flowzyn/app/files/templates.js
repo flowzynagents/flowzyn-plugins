@@ -5,7 +5,7 @@
   const T = [
     { id: 'enquiry-reply', group: 'run', agent: 'lead-catcher', name: 'Enquiry reply', sub: 'Answer Enquiries',
       subject: 'Your request to {business}',
-      body: 'Hi {first name},\n\nThanks for reaching out to {business} about {what they asked}{at address}. The best next step is a quick visit so I can measure and see the space. It takes about half an hour and there is no charge. What day this week or next works for you?\n\n{signature}' },
+      body: 'Hi {first name},\n\nThanks for reaching out to {business} about {what they asked}{at address}. The best next step is a quick visit so I can take a look. It takes about half an hour. What day this week or next works for you?\n\n{signature}' },
     { id: 'repair-reply', group: 'run', agent: 'lead-catcher', name: 'Repair reply', sub: 'Answer Enquiries',
       subject: 'Your {what they asked} request',
       body: 'Hi {first name},\n\nThanks for letting us know{about address}. Sorry something needs looking at. I can come take a look, usually within a few days. What day this week or next works for you?\n\n{signature}' },
@@ -15,41 +15,42 @@
     { id: 'follow-unopened', group: 'run', agent: 'quote-chaser', name: 'Follow up, not opened', sub: 'Chase Quotes',
       subject: 'Your {work} quote from {business}',
       body: 'Hi {first name}, it is {owner} at {business}. Just making sure my {work} quote from {sent date} reached you. I can resend it or go over it by phone, whatever is easier.\n\n{signature}' },
-    { id: 'glass-order', group: 'run', agent: 'install-scheduler', name: 'Glass order', sub: 'Schedule Installs',
-      subject: 'Glass order for {customer}, {quote ref}',
-      body: 'Hi {supplier},\n\nPlease confirm price and lead time on this order for {business}.\n\nJob: {customer}{in town} ({quote ref})\n\n{order lines}\n\nLet me know the earliest delivery date and I will book the install around it.\n\nThanks,\n{signature}' },
+    { id: 'supplier-order', group: 'run', agent: 'install-scheduler', name: 'Supplier order', sub: 'Schedule Installs',
+      subject: 'Order for {customer}, {quote ref}',
+      body: 'Hi {supplier},\n\nPlease confirm price and lead time on this order for {business}.\n\nJob: {customer}{in town} ({quote ref})\n\n{order lines}\n\nLet me know the earliest delivery date and I will book the job around it.\n\nThanks,\n{signature}' },
     { id: 'payment-reminder', group: 'run', agent: 'get-paid', name: 'Payment reminder', sub: 'Collect Payments',
       subject: 'Invoice #{invoice} from {business}',
       body: 'Hi {first name},\n\nHope all is well since we finished up. A quick note that invoice #{invoice} for {amount} was due {due date}. You can pay it online from the invoice email, or just reply and I can take a card over the phone.\n\nIf it is already on its way, thank you and please ignore this.\n\n{signature}' },
     { id: 'builder-intro', group: 'win', agent: 'builder-engine', name: 'Builder intro', sub: 'Reach Builders',
-      subject: 'Glass for your {address}',
-      body: 'Hello {builder} team,\n\nI saw the approval for your {project}{at address}. I am {owner}, owner of {business}. We do shower glass, mirrors and windows for builders around {town}.\n\nIf you have not lined up glass on that one yet, I would be glad to look at the plans and get you a number within the week.\n\n{signature}' },
+      subject: 'A quote for your {address}',
+      body: 'Hello {builder} team,\n\nI saw the approval for your {project}{at address}. I am {owner}, owner of {business}. We work with builders around {town}.\n\nIf you have not lined up our part of that job yet, I would be glad to look at the plans and get you a number within the week.\n\n{signature}' },
     { id: 'builder-follow', group: 'win', agent: 'builder-engine', name: 'Builder follow up', sub: 'Reach Builders',
-      subject: 'Following up: glass for your new build',
-      body: 'Hello {builder} team,\n\nJust following up on my email about glass for {address}. Happy to look at plans whenever suits and get you a number within the week.\n\n{signature}' },
-    { id: 'partner-intro', group: 'win', agent: 'partner-finder', name: 'Partner intro', sub: 'Find Partners · a line each for designers, showrooms and rentals',
-      subject: 'Glass work in {town}',
-      body: '{greeting}\n\nI am {owner}, owner of {business} in {town}. We do shower glass, mirrors and windows around {town}.\n\n{partner line}\n\nWould a quick coffee or call next week work?\n\n{signature}',
+      subject: 'Following up on your new build',
+      body: 'Hello {builder} team,\n\nJust following up on my email about {address}. Happy to look at plans whenever suits and get you a number within the week.\n\n{signature}' },
+    { id: 'partner-intro', group: 'win', agent: 'partner-finder', name: 'Partner intro', sub: 'Find Partners · a line for each kind of partner',
+      subject: 'Working together in {town}',
+      body: '{greeting}\n\nI am {owner}, owner of {business} in {town}.\n\n{partner line}\n\nWould a quick coffee or call next week work?\n\n{signature}',
       lines: { label: 'The line for each kind of partner', fill: 'partner line', items: [
-        ['designer', 'Designers', 'If you have clients who need shower glass, mirrors or windows, I would be glad to be the shop you send them to. We measure, quote within the week and work to your design.'],
-        ['showroom', 'Showrooms', 'When your customers pick a vanity or tile and need shower glass or a mirror to finish it, I would be glad to be the shop you point them to.'],
-        ['rental', 'Rental managers', 'When a unit needs a shower door fixed, a mirror replaced or a window sorted between guests, we can usually get there fast and work around your bookings.']] } },
+        ['designer', 'Designers', 'If you have clients who need work like ours, I would be glad to be the shop you send them to. We quote within the week and work to your design.'],
+        ['showroom', 'Showrooms', 'When your customers need our kind of work to finish a project, I would be glad to be the shop you point them to.'],
+        ['rental', 'Rental and property managers', 'When a unit needs something fixed between guests or tenants, we can usually get there fast and work around your bookings.'],
+        ['other', 'Everyone else', 'If your customers ever need work like ours, I would be glad to be the shop you send them to. We quote within the week.']] } },
     { id: 'win-back', group: 'win', agent: 'lost-quote-revival', name: 'Win back offer', sub: 'Revive Quotes · a line for each season',
       subject: 'Your {work} from {business}',
       body: 'Hi {first name},\n\nIt is {owner} at {business}. Back in {month} we put together a quote for {for work} ({amount}). {season line}\n\nIf it is still on your list, I am happy to refresh the numbers or come take another look. Just reply here and we will set it up.\n\n{signature}',
       lines: { label: 'The line for each season and kind of work', fill: 'season line', items: [
         ['fall.windows', 'Fall, windows', 'With winter coming, now is a good time to get new windows in before the cold sets in.'],
-        ['fall.inside', 'Fall, showers and mirrors', 'We still have room on the calendar before the holidays if you would like it done before family visits.'],
-        ['fall.builder', 'Fall, builders', 'If the project is moving again, we can get you on the schedule before ski season gets busy.'],
+        ['fall.inside', 'Fall, homeowners', 'We still have room on the calendar before the holidays if you would like it done before family visits.'],
+        ['fall.builder', 'Fall, builders', 'If the project is moving again, we can get you on the schedule before the year gets busy.'],
         ['winter.windows', 'Winter, windows', 'Winter is a good time to plan windows so we can install as soon as the weather opens up.'],
-        ['winter.inside', 'Winter, showers and mirrors', 'Winter is a quieter stretch for indoor work, so we can usually get to you quickly.'],
-        ['winter.builder', 'Winter, builders', 'If the project is back on for spring, I would love to get your glass on the calendar early.'],
-        ['spring.windows', 'Spring, windows', 'Spring is a great time for new glass before the summer rental season.'],
-        ['spring.inside', 'Spring, showers and mirrors', 'If you want it done before summer guests arrive, now is the time.'],
-        ['spring.builder', 'Spring, builders', 'Spring starts are filling up and I want to make sure your glass is ready on time.'],
+        ['winter.inside', 'Winter, homeowners', 'Winter is a quieter stretch for indoor work, so we can usually get to you quickly.'],
+        ['winter.builder', 'Winter, builders', 'If the project is back on for spring, I would love to get you on the calendar early.'],
+        ['spring.windows', 'Spring, windows', 'Spring is a great time to get new windows in before summer.'],
+        ['spring.inside', 'Spring, homeowners', 'If you want it done before summer guests arrive, now is the time.'],
+        ['spring.builder', 'Spring, builders', 'Spring starts are filling up and I want to make sure we are ready for yours on time.'],
         ['summer.windows', 'Summer, windows', 'Summer is our best weather for windows and we have a few openings.'],
-        ['summer.inside', 'Summer, showers and mirrors', 'We have a few openings this summer if you would still like it done.'],
-        ['summer.builder', 'Summer, builders', 'If the project picked back up, we can still fit your glass in this season.']] } },
+        ['summer.inside', 'Summer, homeowners', 'We have a few openings this summer if you would still like it done.'],
+        ['summer.builder', 'Summer, builders', 'If the project picked back up, we can still fit you in this season.']] } },
     { id: 'review-homeowner', group: 'keep', agent: 'review-ask', name: 'Review ask, homeowner', sub: 'Get Reviews',
       subject: 'Thank you from {business}',
       body: 'Hi {first name},\n\nThank you for choosing {business} for the {work}. I hope you are enjoying it.\n\nIf you have a minute, a short Google review helps other folks near {town} find us. Here is the link: {review link}\n\nThanks again,\n{signature}' },
@@ -58,7 +59,7 @@
       body: 'Hi {first name},\n\nThanks for bringing us in on the {work}. It was good working with your team.\n\nIf you have a minute, a short Google review from a builder or manager means a lot to a small shop like ours. Here is the link: {review link}\n\nThanks again,\n{signature}' },
     { id: 'check-in', group: 'keep', agent: 'come-back', name: 'Past customer check in', sub: 'Rebook Customers',
       subject: 'Checking in from {business}',
-      body: 'Hi {first name},\n\nIt is {owner} at {business}. It has been about {months} months since we did the {work}{at address}. I hope it is all holding up well.\n\nIf there is anything else on your list, like a mirror, a shower door or a window that sticks, I would be glad to come take a look. Just reply and we will find a time.\n\n{signature}' }
+      body: 'Hi {first name},\n\nIt is {owner} at {business}. It has been about {months} months since we did the {work}{at address}. I hope it is all holding up well.\n\nIf there is anything else on your list, I would be glad to come take a look. Just reply and we will find a time.\n\n{signature}' }
   ];
   const BY = {}; T.forEach((t) => { BY[t.id] = t; });
   let SAVED = {};          // settings/templates: { templates: { id: { subject, body, lines, at, by } } }
@@ -68,6 +69,7 @@
     if (LOADED && !force) return LOADED;
     LOADED = (async () => {
       try { const db = await dbP(); if (!db) return SAVED; const s = await db.doc('settings/templates').get(); SAVED = (s && s.exists && s.data() && s.data().templates) || {}; } catch (e) { /* defaults */ }
+      if (SAVED['glass-order'] && !SAVED['supplier-order']) SAVED['supplier-order'] = SAVED['glass-order'];
       // The builder intro was editable before v3 (settings/profile builderNote). Carry it over until it is saved here.
       try { const p = (window.FZ && FZ.profile && FZ.profile()) || {}; if (p.builderNote && !SAVED['builder-intro']) SAVED['builder-intro'] = { body: legacyBuilder(p.builderNote), legacy: true }; } catch (e) { /* none */ }
       return SAVED;
@@ -119,8 +121,13 @@
       await ref.set(Object.assign({}, prev || {}, { agent: 'lost-quote-revival', subject: conv(t.subject).replace(/\{work\}/g, '{work_short}'), body: conv(t.body), seasonLines, status: 'approved', approvedBy: me.first || 'Owner', approvedAt: new Date().toISOString(), from: 'settings/templates win-back' }));
     } catch (e) { /* the sender keeps the last copy */ }
   }
+  // What a board should send: the owner's own template filled in when they have edited it, otherwise the board's wording.
+  function body(id, vars, line, fallback) {
+    try { const t = get(id); if (t && (SAVED[id] && SAVED[id].body != null || (line && SAVED[id] && SAVED[id].lines))) { const out = fill(id, vars, line).body; if (out) return out; } } catch (e) { /* the board's wording */ }
+    return fallback;
+  }
   window.FZ = window.FZ || {};
   FZ.TEMPLATES = T;
-  FZ.tpl = { list: T, get, fill, save, load, reset: (id) => save(id, null), loaded: () => !!LOADED };
+  FZ.tpl = { list: T, get, fill, body, save, load, reset: (id) => save(id, null), loaded: () => !!LOADED };
   load();
 })();

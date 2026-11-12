@@ -6,22 +6,22 @@ FZ.board('local-search-check', {
     const { ui, fmt } = ctx;
     const { h } = ui;
     const doc = await ctx.store('datasets/local-search').catch(() => null);
-    const searches = (doc && doc.searches) || [];
+    const searches = ((doc && doc.searches) || []).map((s) => Object.assign({}, s, { dunlapPosition: s.dunlapPosition != null ? s.dunlapPosition : (s.yourPosition != null ? s.yourPosition : null), results: (s.results || []).map((r) => Object.assign({}, r, { isDunlap: r.isDunlap != null ? r.isDunlap : !!r.isYou })) }));
     if (!searches.length) {
       ctx.metric('local-search-check', { value: 'First search check running', detail: 'Checked once a month' });
       // Example: before and after for the main search. Made up, and labelled so.
-      const q = 'glass shop ' + FZ.town();
+      const q = FZ.w.kind + ' ' + FZ.town();
       const side = (when, big, sub, hi) => h('div', { class: 'ls-ba' + (hi ? ' hi' : '') }, h('span', { class: 'ls-ba-w' }, when), h('b', null, big), h('span', null, sub));
       const example = h('section', { class: 'fz-sec ls-ex', 'aria-label': 'Example, not your data' },
         h('div', { class: 'ls-ex-top' }, h('h2', { class: 'fz-h2' }, 'Example: what week 2 looks like'), h('span', { class: 'ls-ex-tag' }, 'Example')),
-        h('p', { class: 'fz-sub' }, 'Made up for a glass shop in Breckenridge, searching \u201c' + q + '\u201d. Your real spot replaces this.'),
+        h('p', { class: 'fz-sub' }, 'Made up, searching \u201c' + q + '\u201d. Your real spot replaces this.'),
         h('div', { class: 'ls-pair' },
-          side('First check', 'Not in top 8', 'Summit Glass Co (example) shows first'),
+          side('First check', 'Not in top 8', 'Another shop (example) shows first'),
           h('span', { class: 'ls-arrow', 'aria-hidden': 'true' }, '\u2192'),
           side('Week 2', '#5', 'Up from not in the top 8', true)),
         h('ul', { class: 'ls-done' },
           h('li', null, 'Opening hours fixed on Google'),
-          h('li', null, 'Shower doors and mirrors added to services'),
+          h('li', null, 'Your main services added to the profile'),
           h('li', null, 'Phone and address matched on Yelp')),
         h('style', null, '.ls-ex{border:1px dashed var(--line);border-radius:14px;padding:18px 20px;color:var(--muted)}.ls-ex-top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}.ls-ex .fz-h2{margin:0;color:var(--muted)}.ls-ex-tag{font:700 11px/1 var(--font);letter-spacing:.06em;text-transform:uppercase;border:1px solid var(--line);border-radius:999px;padding:5px 9px;color:var(--muted)}.ls-pair{display:grid;grid-template-columns:minmax(0,1fr) 40px minmax(0,1fr);align-items:stretch;gap:8px;margin-top:12px}.ls-ba{border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:6px;background:var(--quiet)}.ls-ba b{font:800 28px/1.1 var(--font);color:var(--meta,var(--fg))}.ls-ba span{font-size:13px}.ls-ba-w{font-weight:700;text-transform:uppercase;letter-spacing:.05em;font-size:11px!important}.ls-ba.hi{border-color:var(--accent)}.ls-ba.hi b{color:var(--accent);font-size:40px}.ls-arrow{align-self:center;text-align:center;font-size:22px}.ls-done{margin:14px 0 0;padding-left:20px;font-size:14px;line-height:1.7}@media(max-width:520px){.ls-ex{padding:14px}.ls-pair{grid-template-columns:1fr}.ls-arrow{transform:rotate(90deg)}.ls-ba b{font-size:24px}}'));
       const K = FZ.kit;
@@ -30,9 +30,9 @@ FZ.board('local-search-check', {
         ui.status(['Checking where you show up in ', { b: '5 local searches' }, '.']),
         K.how(h, 'It checks where you show up when people nearby search, and picks the fixes that move you up.'),
         K.quiet(h,
-          K.checked(h, 'First search check running', ['Searches set for ' + FZ.town(), 'Checked once a month, on the 1st', 'Your Operator makes the fixes, nothing for you to set up']),
+          K.checked(h, 'First search check running', ['Searches set for ' + FZ.town(), 'Checked once a month, on the 1st', 'Each fix comes with where to go and the words to paste']),
           K.example(h, 'From not in the top 8 to #5', [...example.childNodes].slice(1))),
-        ui.how('Searches are the ones a customer near ' + FZ.town() + ' would type, checked on the first of each month.', 'Each check lists who shows up above you and the three fixes most likely to move you up. Your Operator makes the fixes.')
+        ui.how('Searches are the ones a customer near ' + FZ.town() + ' would type, checked on the first of each month.', 'Each check lists who shows up above you and the three fixes most likely to move you up. You make each fix on Google, or hand it to your Operator.')
       ];
     }
     const N = 8;
@@ -88,7 +88,7 @@ FZ.board('local-search-check', {
     const table = ui.table([
       { label: 'Search', get: (sx) => sx.query },
       { label: 'Your spot', get: (sx) => sx.dunlapPosition ? '#' + sx.dunlapPosition : 'Not in top ' + N },
-      { label: 'Top glass business', get: (sx) => { const r = shops(sx)[0]; return r ? (r.url ? ui.extLink(r.url, '#' + r.position + ' ' + r.name) : '#' + r.position + ' ' + r.name) : 'Only directories'; } },
+      { label: 'Top business', get: (sx) => { const r = shops(sx)[0]; return r ? (r.url ? ui.extLink(r.url, '#' + r.position + ' ' + r.name) : '#' + r.position + ' ' + r.name) : 'Only directories'; } },
       { label: 'Next', get: (sx) => { const r = shops(sx)[1]; return r ? '#' + r.position + ' ' + r.name : ''; } }
     ], searches, { open: true });
     // Every fix must be doable (Matt, Nov 7): a do it yourself path with the exact place to go and the words ready to paste,
@@ -99,7 +99,7 @@ FZ.board('local-search-check', {
       const T = (FZ.tasksNow && FZ.tasksNow().done) || {};
       const kindOf = (t) => /yelp/i.test(t) ? 'yelp' : /review/i.test(t) ? 'reviews' : /google|services|description|profile|hours|category/i.test(t) ? 'google' : /yellow ?pages|yp\.com|bbb|facebook|listing/i.test(t) ? 'listing' : 'other';
       const PLAN = {
-        google: { mins: 'About 5 minutes', open: ['Open your Google profile', 'https://business.google.com/'], copy: ['Copy the wording', () => biz + ' does shower doors, mirrors, window repair, window replacement and glass repair in ' + town + (FZ.region() !== town ? ' and around ' + FZ.region() : '') + '. Free measures, quotes within the week.'], how: 'In your Google profile press Edit profile, then Services and Description, and paste.' },
+        google: { mins: 'About 5 minutes', open: ['Open your Google profile', 'https://business.google.com/'], copy: ['Copy the wording', () => biz + ' does ' + FZ.w.services + ' in ' + town + (FZ.region() !== town ? ' and around ' + FZ.region() : '') + '. Free measures, quotes within the week.'], how: 'In your Google profile press Edit profile, then Services and Description, and paste.' },
         yelp: { mins: 'About 10 minutes', open: ['Open Yelp for Business', 'https://biz.yelp.com/'], copy: ['Copy the message to Yelp', (f) => 'Hi Yelp, ' + biz + ' has two pages. The old page is closed and still holds our reviews. Please merge it into our current page so the reviews show in one place. Old page: ' + (f.url || '[link]') + '. Thank you.'], how: 'Sign in, open Support, choose Duplicate listing, and paste the message.' },
         listing: { mins: 'About 10 minutes', open: ['Open the listing', null], copy: ['Copy the right details', () => biz + ', ' + town + ', CO. ' + ((FZ.profile() || {}).phone || '') ], how: 'Use Claim or Suggest an edit on the listing and paste the right name, phone and address.' },
         reviews: { mins: 'About 1 minute', agent: ['Send the review asks', '#a-review-ask'], how: 'Your Get Reviews agent has the asks written. Approve them there.' },
@@ -138,7 +138,7 @@ FZ.board('local-search-check', {
     const rivals = [...comp.values()].sort((a, b) => b.wins.size - a.wins.size || a.best - b.best).slice(0, 8);
     if (rivals.length) {
       const maxW = Math.max(...rivals.map((r) => r.wins.size));
-      out.push(ui.section(fmt.plural(rivals.length, 'glass business', 'glass businesses') + ' also show up', 'Competitors customers see for the searches above, with their best spot. Directories like Yelp and Angi are left out. Google Maps results are added once your Operator switches on Google.',
+      out.push(ui.section(fmt.plural(rivals.length, 'business', 'businesses') + ' also show up', 'Competitors customers see for the searches above, with their best spot. Directories like Yelp and Angi are left out. Google Maps results are added once your Operator switches on Google.',
         h('div', { class: 'ls-comp' }, rivals.map((r, i) => h('div', { class: 'ls-crow' },
           h('span', { class: 'ls-cn' }, String(i + 1)),
           h('span', { class: 'ls-cname' }, r.url ? ui.extLink(r.url, r.name, 'fz-tlink') : r.name,

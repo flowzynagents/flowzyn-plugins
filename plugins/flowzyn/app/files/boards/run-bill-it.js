@@ -40,7 +40,7 @@ FZ.board('bill-it', {
       st.classList.add('bi-good');
       out.push(st, K.how(h, 'It watches Jobber for finished jobs and has each invoice ready for your OK the same day.'));
       const DAY = 86400000;
-      const exItems = [['Lakeview Condo', 'Shower door', 1, 4850], ['Bluebird Cabin', '6 window panes', 0.5, 3200], ['Main Street Salon', 'Mirror wall', 0.8, 1900], ['Pine Ridge HOA', 'Storefront glass', 2, 2600]];
+      const exItems = [['Lakeview Condo', 'Install', 1, 4850], ['Bluebird Cabin', 'Repair', 0.5, 3200], ['Main Street Salon', 'Service call', 0.8, 1900], ['Pine Ridge HOA', 'Replacement', 2, 2600]];
       out.push(K.quiet(h,
         K.checked(h, 'Finished jobs checked in Jobber', ['No job is marked as needing an invoice', ranAt ? 'Last check ' + ranAt : 'Checked live from Jobber just now', 'New finished jobs get an invoice ready the same day']),
         K.example(h, 'Most invoices out inside a day', ui.waits(exItems.map(([who, sub, days, amount]) => ({ who: who + ' (example)', sub, days: Math.round(days), amount, act: h('span') })), { goal: 1, goalLabel: '1 day', ok: 'Inside a day', late: 'Waiting longer' }))));

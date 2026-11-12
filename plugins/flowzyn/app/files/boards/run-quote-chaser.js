@@ -39,7 +39,8 @@ FZ.board('quote-chaser', {
 
     const first = (r) => fmt.firstName(r.who);
     const sentOn = (r) => r.q.sentAt ? fmt.fmtDate(r.q.sentAt) : 'recently';
-    const draftFor = (r) => r.opened
+    const draftFor = (r) => FZ.tpl.body(r.opened ? 'follow-opened' : 'follow-unopened', { 'first name': first(r), work: r.title.toLowerCase(), 'sent date': sentOn(r) }, null, draftFor0(r));
+    const draftFor0 = (r) => r.opened
       ? 'Hi ' + first(r) + ', it is ' + FZ.me().first + ' at ' + FZ.biz() + '. I saw you had a look at the ' + r.title.toLowerCase() + ' quote I sent on ' + sentOn(r) + '. Any questions I can answer, or anything you would like changed? Happy to walk through it on the phone or at the house.\n\n' + FZ.sign()
       : 'Hi ' + first(r) + ', it is ' + FZ.me().first + ' at ' + FZ.biz() + '. Just making sure my ' + r.title.toLowerCase() + ' quote from ' + sentOn(r) + ' reached you. I can resend it or go over it by phone, whatever is easier.\n\n' + FZ.sign();
     const callBrief = (r) => {

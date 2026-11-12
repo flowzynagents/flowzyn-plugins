@@ -2,55 +2,90 @@
 // Shown at the foot of every agent board. The same rules sit in the shop's Claude project as its knowledge base.
 (function () {
   const R = {
-    'where-to-find-work': {
-      can: ['Map every home near you by value, from public records', 'Show licensed rentals, homes that sold recently (from Zillow) and your own customers on the map', 'Rank the 5 areas with the most work you have not reached', 'Write your intro to local realtors', 'Work out what a month of hangers or postcards costs, and the response it needs to pay off', 'Match new Jobber requests to the houses you dropped cards at, for 90 days'],
-      cant: ['Show county permits yet. The county keeps those behind a login.', 'Show sale dates or sold condos. Zillow gives recently sold houses and townhomes, without the date.', 'Show rentals inside Breckenridge town limits yet. The town keeps its own list.', 'Mail anything for you'],
-      ask: ['Which neighbourhoods should I go after next?', 'Which areas have the most homes that sold recently?', 'Where are my customers clustered?']
-    },
     'builder-engine': {
-      can: ['Find builders pulling new permits near you', 'Write an intro email from you for each one', 'Send it from your email once you approve it, or on its own with auto approve'],
-      cant: ['Send without your OK, unless auto approve is on', 'Find personal mobile numbers'],
-      ask: ['Which builders pulled permits near me this month?', 'Write an intro to the builder on the biggest permit']
+      can: ["Find builders with new projects near you, from open permit lists where your county publishes one and from Google listings", "Find the office email each builder publishes", "Write an intro email from you for each one", "Track replies in your email and write a follow up after 7 days with no reply"],
+      cant: ["Send anything you have not approved", "Read permits a county keeps behind a login", "Find personal mobile numbers"],
+      ask: ["Which builders have new projects near me this month?", "Write an intro to the builder on the biggest project"]
     },
     'partner-finder': {
-      can: ['Find showrooms, designers and property managers near you', 'Write a short partner intro from you'],
-      cant: ['Run until the Google key is set up', 'Send without your OK, unless auto approve is on'],
-      ask: ['Find 10 interior designers near me I should know', 'Write an intro to a kitchen and bath showroom']
+      can: ["Find local businesses that can send you work, from Google listings and their own websites", "Write a short partner intro from you", "Track replies in your email"],
+      cant: ["Send anything you have not approved", "Guess an email a business does not publish"],
+      ask: ["Find 10 businesses near me that could send us work", "Write an intro to a property manager"]
     },
     'local-search-check': {
-      can: ['Check how you show up when people search for glass near you', 'List the fixes that move you up'],
-      cant: ['Run until the Google key is set up', 'Change your Google profile for you'],
-      ask: ['How do I show up for shower glass in the next town over?']
+      can: ["Check where you show up when people nearby search for your work", "List the fixes that move you up, with where to go and the words to paste"],
+      cant: ["Change your Google profile for you. You make each fix on Google, then mark it done"],
+      ask: ["How do I show up when people near me search for my work?"]
     },
     'lost-quote-revival': {
-      can: ['Find quotes that went quiet months ago', 'Write a short note to restart each one'],
-      cant: ['Send a note without your OK, unless auto approve is on'],
-      ask: ['Which old quotes are worth one more try?', 'Write a note to the biggest quote that went quiet']
+      can: ["Find quotes that went quiet months ago", "Write a short note to restart each one"],
+      cant: ["Send a note you have not approved"],
+      ask: ["Which old quotes are worth one more try?", "Write a note to the biggest quote that went quiet"]
     },
     'morning-brief': {
-      can: ['Read Jobber every morning and list what needs you, biggest dollars first', 'Catch loose ends, like a mirror promised after a shower job', 'Turn a loose end into a request in Jobber', 'Remind you on a day you pick'],
-      cant: ['Read texts on your phone', 'See photos or drawings in Jobber'],
-      ask: ['What needs me today?', 'What did we promise on finished jobs that never got quoted?']
+      can: ["Read your field app every weekday morning and list what needs you, biggest dollars first", "Send the emails you approved", "Email you one short brief on days something needs you"],
+      cant: ["Read texts on your phone", "See photos or drawings stored in your field app"],
+      ask: ["What needs me today?", "What did we promise on finished jobs that never got quoted?"]
     },
     'lead-catcher': {
-      can: ['Spot new enquiries in Jobber', 'Write the reply from you'],
-      cant: ['Reply to texts', 'Send a reply without your OK, unless auto approve is on'],
-      ask: ['Who enquired this week and has not heard back?', 'Write a reply to the newest enquiry']
-    },
-    'quick-capture': {
-      can: ['Create a request in Jobber for any customer and address on file', 'Read the sizes from a photo of the drawing', 'Draft the quote from your supplier costs or formula when it has the sizes'],
-      cant: ['Attach a photo in Jobber', 'Create a new customer from here yet', 'Send the quote'],
-      ask: ['Quote a mirror 44 x 30 for Jake at Monroe St', 'Add a request for Rich: remeasure the mirror at Westridge']
+      can: ["Spot new enquiries in your field app and in your email", "Write the reply from you"],
+      cant: ["Read texts or calls to your phone. Forward a text to Claude instead", "Send a reply you have not approved"],
+      ask: ["Who enquired this week and has not heard back?", "Write a reply to the newest enquiry"]
     },
     'quotes': {
-      can: ['Draft a quote for every measured job in Jobber', 'Read the sizes from a photo of the drawing', 'Price it from your supplier costs or your formula, your choice', 'Create the draft quote in Jobber and convert the request', 'Capture anything asked for on site as a request'],
-      cant: ['Open drawings stored in Jobber. Take a photo of the drawing instead.', 'Send the quote. You press send in Jobber.', 'Read a PDF cost sheet directly. Take a screenshot of each page.'],
-      ask: ['Draft the quote for the Smith job: 74 x 82 shower, 30 x 42 mirror', 'Quote a mirror 44 x 30 for Jake at Monroe St', 'What does a 60 x 80 shower in 3/8 clear cost me from my supplier?']
+      can: ["Draft a quote for every job you have visited or measured, from your own price list and similar past quotes", "Save it as a draft in your field app", "Turn anything asked for on site into a request, from a line you type or say"],
+      cant: ["Send the quote. You check it and press send", "Open drawings or photos stored in your field app", "Create a new customer from the app"],
+      ask: ["Which visited jobs still need a quote?", "Draft the quote for the job I looked at yesterday"]
+    },
+    'quote-chaser': {
+      can: ["Find quotes past your field app's own reminders", "Write a personal follow up from you", "Flag the big ones worth a call"],
+      cant: ["Send a follow up you have not approved", "Follow up by text"],
+      ask: ["Which quotes need a personal follow up?", "Write a follow up for the biggest open quote"]
+    },
+    'install-scheduler': {
+      can: ["List every yes not booked yet", "Write the order to your supplier from the quote lines", "Read the delivery date from the supplier's reply in your email and nudge them after 3 days", "Pick the first free days after delivery", "Write the note asking the customer which day", "Flag late deliveries and customers who have not answered"],
+      cant: ["Create the job or the visit where your field app does not allow it. You set it in one tap", "Read or send texts"],
+      ask: ["Which approved quotes still need ordering?", "Which jobs are waiting on a delivery?"]
+    },
+    'bill-it': {
+      can: ["Find finished jobs not invoiced yet", "Open each job ready to invoice"],
+      cant: ["Send the invoice. You press send in your field app"],
+      ask: ["Which finished jobs still need an invoice?"]
+    },
+    'get-paid': {
+      can: ["Find overdue invoices, biggest first", "Check your books first, so nobody is nudged for a bill they already paid", "Write a friendly reminder from you"],
+      cant: ["Take payments", "Send a reminder you have not approved"],
+      ask: ["Who owes me money and how late is it?", "Write a reminder for the biggest overdue invoice"]
+    },
+    'pay-bills': {
+      can: ["Show the bills due in your books", "Flag one that looks too high or billed twice", "Remind you before they are late"],
+      cant: ["Pay a bill. You press pay in your books"],
+      ask: ["What bills are due this week?"]
+    },
+    'review-ask': {
+      can: ["Find customers who just paid, trade customers first", "Write the review ask from you with your saved review link"],
+      cant: ["Send an ask you have not approved", "Post or answer reviews"],
+      ask: ["Who should I ask for a review this week?"]
+    },
+    'come-back': {
+      can: ["Find past customers due for more work, 6 to 18 months after their job", "Write a note from you"],
+      cant: ["Send a note you have not approved"],
+      ask: ["Which past customers have not been back in a year?"]
+    },
+    'yes-to-install': {
+      can: ["List every yes not booked yet", "Write the order to your supplier from the quote lines", "Read the delivery date from the supplier's reply in your email and nudge them after 3 days", "Pick the first free days after delivery", "Write the note asking the customer which day", "Flag late deliveries and customers who have not answered"],
+      cant: ["Create the job or the visit where your field app does not allow it. You set it in one tap", "Read or send texts"],
+      ask: ["Which approved quotes still need ordering?", "Which jobs are waiting on a delivery?"]
+    },
+    'quick-capture': {
+      can: ["Draft a quote for every job you have visited or measured, from your own price list and similar past quotes", "Save it as a draft in your field app", "Turn anything asked for on site into a request, from a line you type or say"],
+      cant: ["Send the quote. You check it and press send", "Open drawings or photos stored in your field app", "Create a new customer from the app"],
+      ask: ["Which visited jobs still need a quote?", "Draft the quote for the job I looked at yesterday"]
     },
     'quote-prep': {
-      can: ['Draft a quote for every measured request', 'Read the sizes from a photo of the drawing', 'Price it from your supplier costs or your formula', 'Create the draft quote in Jobber and convert the request'],
-      cant: ['Open drawings stored in Jobber. Take a photo of the drawing instead.', 'Send the quote. You press send in Jobber.'],
-      ask: ['Draft the quote for the Smith job: 74 x 82 shower, 30 x 42 mirror', 'Which measured requests still need a quote?']
+      can: ["Draft a quote for every job you have visited or measured, from your own price list and similar past quotes", "Save it as a draft in your field app", "Turn anything asked for on site into a request, from a line you type or say"],
+      cant: ["Send the quote. You check it and press send", "Open drawings or photos stored in your field app", "Create a new customer from the app"],
+      ask: ["Which visited jobs still need a quote?", "Draft the quote for the job I looked at yesterday"]
     },
     'supplier-costs': {
       can: ['Read your supplier\u2019s cost sheet from a photo or pasted text', 'Price every quote from the glass and hardware cost plus your markup and install', 'Show the same panel priced from costs and from your formula, so you can compare'],
@@ -61,58 +96,18 @@
       can: ['Learn your all in price from past quotes with sizes', 'Show quotes priced off your book', 'Price every new quote from the formula you approve'],
       cant: ['Learn from quotes with no sizes written on them', 'Change past quotes'],
       ask: ['What do I really charge a square foot for showers?', 'Which quotes were priced under my formula?']
-    },
-    'quote-chaser': {
-      can: ['Find quotes past Jobber’s own reminders', 'Write a personal follow up from you', 'Send it from your email once you approve it, or on its own with auto approve'],
-      cant: ['Send a follow up without your OK, unless auto approve is on', 'Follow up by text'],
-      ask: ['Which quotes need a personal follow up?', 'Write a follow up for the biggest open quote']
-    },
-    'yes-to-install': {
-      can: ['List every yes not booked yet', 'Write the glass order to your supplier with the job details'],
-      cant: ['Convert a quote to a job in Jobber', 'Attach the drawing to the order. Forward it yourself.'],
-      ask: ['Which approved quotes still need the glass ordered?', 'Write the glass order for the Westridge job']
-    },
-    'install-scheduler': {
-      can: ['Track every job from glass ordered to install day', 'Pick the first free install days after delivery', 'Write the note asking the customer which day', 'Answer “how’s it looking” with one tap', 'Flag late glass and customers who have not answered'],
-      cant: ['Open the supplier sheet itself. Add a screenshot and it reads the dates.', 'Read or send texts. You copy the text.', 'Create the visit. You set it in Jobber in one tap.'],
-      ask: ['When is the glass for Wayne landing, and what days can we install?', 'Write a text to Nick saying his glass is on order']
-    },
-    'bill-it': {
-      can: ['Find finished jobs not invoiced yet', 'Open each job ready to invoice'],
-      cant: ['Create or send the invoice. You press Create Invoice in Jobber.'],
-      ask: ['Which finished jobs still need an invoice?']
-    },
-    'get-paid': {
-      can: ['Find overdue invoices, biggest first', 'Write a friendly nudge from you'],
-      cant: ['Take payments', 'Send a nudge without your OK, unless auto approve is on'],
-      ask: ['Who owes me money and how late is it?', 'Write a nudge for the biggest overdue invoice']
-    },
-    'pay-bills': {
-      can: ['Show the bills due in QuickBooks', 'Remind you before they are late'],
-      cant: ['Pay a bill. You press pay in QuickBooks.'],
-      ask: ['What bills are due this week?']
-    },
-    'review-ask': {
-      can: ['Find happy customers from finished jobs', 'Write the review ask from you'],
-      cant: ['Send an ask without your OK, unless auto approve is on', 'Post or answer reviews'],
-      ask: ['Who should I ask for a review this week?']
-    },
-    'come-back': {
-      can: ['Find past customers due for more work', 'Write a note from you'],
-      cant: ['Send a note without your OK, unless auto approve is on'],
-      ask: ['Which past customers might want a mirror or a second shower?']
     }
   };
-  const ALWAYS = ['Nothing goes out until you approve it, or until you turn on auto approve for that agent', 'Works only in your Jobber, your email and QuickBooks'];
+  const ALWAYS = ['Nothing goes out until you approve it, or until you turn on auto approve for that agent', 'Works only in your own field app, books and email'];
 
   // What to do here: three steps naming the exact tab and buttons, shown at the top of each agent page.
   const DO = {
     'morning-brief': { steps: ['Read the 3 biggest items on the Summary tab', 'Press Read and approve on each, or open the Approve today tab for the rest', 'Loose ends at the bottom: Turn into a request, Remind me, or Done'], idle: 'It reads Jobber every weekday morning. New items show up here by 7am.' },
     'lead-catcher': { steps: ['Open the Reply to enquiries tab', 'Read the reply written for each new enquiry', 'Press Approve and send, or call them yourself'], idle: 'No one is waiting on a reply. New enquiries show up here the same day.' },
-    'quotes': { steps: ['Open a job on the To quote tab', 'Check the price, or type the sizes or press Read sizes from a photo', 'Press Create draft quote in Jobber, then send it from Jobber'], idle: 'Nothing to quote. New measures show up here the morning after the visit.' },
+    'quotes': { steps: ['Open a job on the To quote tab', 'Check the lines and the price', 'Press Create draft quote in Jobber, then send it from Jobber'], idle: 'Nothing to quote. Jobs you visit show up here the morning after.' },
     'quote-chaser': { steps: ['Open the Send follow ups tab', 'Read the follow up written for each quote', 'Press Approve and send, or call the big ones yourself'], idle: 'No quote needs a personal follow up. Jobber’s own reminders cover the first week.' },
-    'yes-to-install': { steps: ['Open the Order and book jobs tab', 'Check the glass order written for your supplier', 'Press Approve and send, then book the job in Jobber'], idle: 'Every yes is booked. New approvals show up here the same day.' },
-    'install-scheduler': { steps: ['Open the Line up installs tab', 'Type the delivery date from the supplier sheet and press Save delivery date', 'Send the install day note, tap the day they pick, then set it in Jobber'], idle: 'Every job has an install day. Jobs waiting on glass show up here.' },
+    'yes-to-install': { steps: ['Open the Order and book jobs tab', 'Check the order written for your supplier', 'Press Approve and send, then book the job in Jobber'], idle: 'Every yes is booked. New approvals show up here the same day.' },
+    'install-scheduler': { steps: ['Open the Line up installs tab', 'Check the delivery date read from your supplier, or type it and press Save delivery date', 'Send the install day note, tap the day they pick, then set it in Jobber'], idle: 'Every job has a day. Jobs waiting on a delivery show up here.' },
     'bill-it': { steps: ['Press Invoice it on a finished job', 'In Jobber press Create Invoice, then Send', 'Come back and press Invoiced in Jobber so it drops off your list'], idle: 'Every finished job is invoiced.' },
     'get-paid': { steps: ['Open the Send payment reminders tab', 'Read the reminder written for each overdue invoice', 'Press Approve and send, or call them yourself'], idle: 'Nothing overdue. Overdue invoices show up here the day after they are due.' },
     'review-ask': { steps: ['Open the Request customer reviews tab', 'Read the ask written for each customer who just paid', 'Press Approve and send, or Already handled if you asked in person'], idle: 'No one to ask this week. Finished jobs show up here a few days after.' },

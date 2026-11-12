@@ -6,4 +6,4 @@ description: Use when the owner wants to tell Flowzyn something ("tell Flowzyn..
 # Tell Flowzyn
 
 - Feedback: call `tell_flowzyn` with the owner's own words, plus the agent and task if known. Reply: "Passed on to Flowzyn."
-- A job for a person: call `hand_to_operator` with what's needed and how soon. Reply: "Your Flowzyn Operator has it and will reply by email."
+- A task for a person: call `hand_to_operator` with what's needed and how soon. Name the record and where to find it, never a customer's email or phone number. Reply with what the tool says back.

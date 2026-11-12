@@ -36,7 +36,7 @@
         steps: big
           ? ['Open the quote in Jobber and note the client’s phone number.', 'Call ' + fmt.firstName(name) + '. Ask if they have questions and when they would like to start.', 'If they say yes, press Approve on the quote, or ask them to approve it in their client hub.', 'Then press Called here.']
           : ['Open the quote in Jobber.', 'Copy the note below into an email to ' + fmt.firstName(name) + ', or press Resend in Jobber and paste it as the message.', 'Come back and press Done.'],
-        draft: 'Hi ' + fmt.firstName(name) + ',\n\nJust checking in on the quote for ' + fmt.clean(q.title || 'your glass') + '. Happy to answer any questions or adjust anything. If it looks good, I can get you on the schedule.\n\n' + FZ.sign()
+        draft: 'Hi ' + fmt.firstName(name) + ',\n\nJust checking in on the quote for ' + fmt.clean(q.title || 'your order') + '. Happy to answer any questions or adjust anything. If it looks good, I can get you on the schedule.\n\n' + FZ.sign()
       });
     });
 
@@ -48,7 +48,7 @@
         title: 'Turn ' + name + '’s approved quote into a job',
         meta: fmt.money(q.total) + ' · approved ' + (q.approvedAt ? fmt.fmtDate(q.approvedAt) : ''),
         link: q.jobberWebUri, linkLabel: 'Open quote in Jobber',
-        steps: ['Open the quote in Jobber.', 'Press Convert to Job.', 'On the new job, schedule the first visit and assign the crew.', 'Order the glass if it is not in stock (Book Jobs has the order email).', 'Come back and press Done.']
+        steps: ['Open the quote in Jobber.', 'Press Convert to Job.', 'On the new job, schedule the first visit and assign the crew.', 'Order what the job needs if it is not in stock (Schedule Installs has the order email).', 'Come back and press Done.']
       });
     });
 
@@ -138,8 +138,8 @@
       const since = fmt.daysSince(j.createdAt) || 0;
       if (p.picked) add(Object.assign(base, { id: 'inst-set-' + j.id + '-' + p.picked, ready: 'Day picked', approve: 'Set it in Jobber', score: 6500, title: 'Set ' + name + '\u2019s install for ' + dayName(p.picked), review: 'Set ' + name + '\u2019s install for ' + dayName(p.picked), meta: 'Job #' + j.jobNumber + ' \u00b7 the customer picked the day' }));
       else if (p.askedAt) { if ((fmt.daysSince(p.askedAt) || 0) > 2) add(Object.assign(base, { id: 'inst-ans-' + j.id, ready: 'No answer yet', approve: 'See the job', score: 4500, title: name + ' has not picked an install day', review: name + ' has not picked an install day', meta: 'Asked ' + fmt.plural(fmt.daysSince(p.askedAt), 'day') + ' ago' })); }
-      else if (p.delivery) add(Object.assign(base, { id: 'inst-ask-' + j.id, ready: 'Note ready', approve: 'Ask the customer', score: 5500, title: 'Ask ' + name + ' which install day', review: 'Ask ' + name + ' which install day', meta: 'Glass lands ' + dayName(p.delivery) }));
-      else if (since > 5) add(Object.assign(base, { id: 'inst-date-' + j.id, ready: 'Needs a date', approve: 'Add the delivery date', score: 3000 + Math.min(since, 30) * 50, title: 'Add the delivery date for ' + name + '\u2019s glass', review: 'Add the delivery date for ' + name + '\u2019s glass', meta: 'Job #' + j.jobNumber + ' \u00b7 no delivery date yet' }));
+      else if (p.delivery) add(Object.assign(base, { id: 'inst-ask-' + j.id, ready: 'Note ready', approve: 'Ask the customer', score: 5500, title: 'Ask ' + name + ' which install day', review: 'Ask ' + name + ' which install day', meta: 'Delivery ' + dayName(p.delivery) }));
+      else if (since > 5) add(Object.assign(base, { id: 'inst-date-' + j.id, ready: 'Needs a date', approve: 'Add the delivery date', score: 3000 + Math.min(since, 30) * 50, title: 'Add the delivery date for ' + name + '\u2019s order', review: 'Add the delivery date for ' + name + '\u2019s order', meta: 'Job #' + j.jobNumber + ' \u00b7 no delivery date yet' }));
     });
 
     // Exceptions an agent handed over.
@@ -538,7 +538,7 @@
     addBtn.addEventListener('click', () => { ADD_OPEN = !ADD_OPEN; api.repaint(); });
     let addForm = null;
     if (ADD_OPEN) {
-      const title = h('input', { type: 'text', class: 'mt-in', required: true, maxlength: '140', id: 'mt-title', placeholder: 'Call Kim about the shower door' });
+      const title = h('input', { type: 'text', class: 'mt-in', required: true, maxlength: '140', id: 'mt-title', placeholder: 'Call Kim about the quote' });
       const link = h('input', { type: 'text', class: 'mt-in', id: 'mt-link', inputmode: 'url', placeholder: 'Jobber link or web address' });
       const agent = h('select', { class: 'mt-in', id: 'mt-agent' }, h('option', { value: '' }, 'No agent'), FZ.AGENTS.map((a) => h('option', { value: a.key }, a.name.replace(/ Agent$/, ''))));
       const sv = h('button', { type: 'submit', class: 'fz-btn mt-b' }, 'Add to the board');

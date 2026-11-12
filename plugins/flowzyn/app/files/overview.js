@@ -87,13 +87,13 @@
     // Live numbers for the popular agents on the Agents tab.
     ctx.metric('quote-chaser', { value: fmt.plural(waitingQuotes.length, 'quote') + ' waiting', detail: fmt.money(waitingDollars, { short: true }) + ' in total' });
     ctx.metric('get-paid', { value: fmt.money(overdue, { short: true }) + ' overdue', detail: fmt.plural(pastDue.length, 'invoice') });
-    if (permits.length) ctx.metric('builder-engine', { value: fmt.plural(builders, 'builder') + ' with new approvals', detail: permits.length + ' approvals in Denver and Boulder' });
+    if (permits.length) ctx.metric('builder-engine', { value: fmt.plural(builders, 'builder') + ' with new approvals', detail: permits.length + ' new projects near you' });
 
     // Ask box: type what you need, get the agent that does it.
     const ASK = {
-      'builder-engine': 'builders builder gc contractors permits new work denver boulder grow growth leads find work outreach',
+      'builder-engine': 'builders builder gc contractors permits new work grow growth leads find work outreach',
       'lost-quote-revival': 'old quotes archived lost dead revive bring back',
-      'partner-finder': 'partners designers showrooms rental managers referrals',
+      'partner-finder': 'partners designers showrooms rental property managers realtors referrals',
       'local-search-check': 'google maps ranking seo search found online',
       'morning-brief': 'today brief what needs me summary morning priorities',
       'lead-catcher': 'enquiries inquiries leads new requests reply',
@@ -148,7 +148,7 @@
     }, 3000);
     askInput.addEventListener('blur', () => setTimeout(() => { if (!askInput.value.trim() && !results.contains(document.activeElement)) results.replaceChildren(); }, 150));
     askInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { const first = results.querySelector('a.ov-hit'); if (first) { e.preventDefault(); location.hash = first.getAttribute('href'); } } });
-    const chips = ['Find builders in Denver', 'Chase my quotes', 'Who owes me money', 'What’s on tomorrow', 'Any weather problems'].map((t) =>
+    const chips = ['Find builders near me', 'Chase my quotes', 'Who owes me money', 'What’s on tomorrow', 'Any weather problems'].map((t) =>
       h('button', { type: 'button', class: 'ov-askchip', onclick: () => { askInput.value = t; show(); askInput.focus(); } }, t));
     const ask = h('div', { class: 'ov-ask' },
       h('div', { class: 'ov-askbox' },
@@ -393,9 +393,10 @@
     // Agents at work, grouped Win, Run, Keep, with today's runs and the one working now.
     const todayRuns = runsToday();
     const workingNow = (a) => { const r = (FZ.runs || {})[a.key]; return !!(r && r.last && Date.now() - new Date(r.last).getTime() < 10 * 60000 && r.lastStatus !== 'error'); };
-    const working = FZ.AGENTS.filter(workingNow);
+    const SEEN = FZ.AGENTS.filter(FZ.shown);
+    const working = SEEN.filter(workingNow);
     const counts = { green: 0, amber: 0, red: 0, grey: 0 };
-    FZ.AGENTS.forEach((a) => { counts[FZ.health(a).tone]++; });
+    SEEN.forEach((a) => { counts[FZ.health(a).tone]++; });
     const nExc = FZ.openExc().length;
     const agentsCard = h('section', { class: 'ov-card' },
       h('h2', null, 'Your agents'),
@@ -405,7 +406,7 @@
         counts.amber ? h('span', { class: 'chip' }, h('span', { class: 'dot amber' }), counts.amber + ' live view only') : null,
         counts.red ? h('span', { class: 'chip' }, h('span', { class: 'dot red' }), fmt.plural(counts.red, 'error')) : null,
         FZ.isOperator() ? h('span', { class: 'chip' }, h('span', { class: 'dot ' + (nExc ? 'red' : 'green') }), nExc ? fmt.plural(nExc, 'exception') + ' need a person' : 'No exceptions') : null),
-      FZ.isOperator() ? h('p', { class: 'fz-sub' }, FZ.AGENTS.length + ' agents across Win, Run and Keep. Each one moves a number above.')
+      FZ.isOperator() ? h('p', { class: 'fz-sub' }, FZ.AGENTS.filter(FZ.shown).length + ' agents across Win, Run and Keep. Each one moves a number above.')
         : h('div', null,
           ['growth', 'run', 'keep'].map((g) => {
             const list = FZ.AGENTS.filter((a) => a.core && a.group === g);
@@ -421,7 +422,7 @@
                   nToday ? h('span', { class: 'det' }, 'Ran ' + fmt.plural(nToday, 'time') + ' today') : null)); })));
           }),
           h('p', { class: 'fz-sub' }, (working.length ? 'Now: ' + working.map((a) => a.name).join(', ') + '. ' : '') + 'Win brings work in, Run gets it done and paid, Keep brings customers back.')),
-      h('div', { class: 'fz-card-btns' }, h('a', { class: 'fz-btn act', href: '#all' }, 'See all ' + FZ.AGENTS.length + ' agents')));
+      h('div', { class: 'fz-card-btns' }, h('a', { class: 'fz-btn act', href: '#all' }, 'See all ' + FZ.AGENTS.filter(FZ.shown).length + ' agents')));
 
     // ---- This month: three numbers, each against last month and pace ----
     const lastMonth = months[4];
@@ -668,7 +669,7 @@
       }), h('style', null, '.dt-wact{display:flex;flex-direction:column;gap:10px;margin-top:16px;padding-top:16px;border-top:1px solid var(--line)}.dt-wrow{display:flex;align-items:center;gap:14px;flex-wrap:wrap;font-size:14px;color:var(--muted)}.dt-wrow b{color:var(--fg)}.dt-wrow>span{flex:1;min-width:200px}')) : null) : null;
 
     // 6 Money path
-    const STEP_NOTE = ['quoted and not won yet. The Chase Quotes Agent follows up every open quote.', 'won and not done yet. The Book Jobs Agent books every yes.', 'of finished work not invoiced yet. The Send Invoices Agent invoices it.', 'invoiced and not paid yet. The Collect Payments Agent nudges every late one.'];
+    const STEP_NOTE = ['quoted and not won yet. The Chase Quotes Agent follows up every open quote.', 'won and not done yet. The Schedule Installs Agent books every yes.', 'of finished work not invoiced yet. The Send Invoices Agent invoices it.', 'invoiced and not paid yet. The Collect Payments Agent nudges every late one.'];
     const GAP_T = ['quotes not yet won', 'won work not yet done', 'finished work not yet invoiced', 'invoices not yet paid'];
     // Only steps with money in them are drawn. The gap mark sits on the step after the gap, or on the step before it when that one is empty.
     const gapAt = gi < 0 ? -1 : path[gi + 1][1] > 0 ? gi + 1 : gi;
@@ -682,7 +683,7 @@
     // 8 Your agents and 9 what they told each other
     const coreAgents = FZ.AGENTS.filter((a) => a.core);
     const dtAgents = h('section', { class: 'dt-panel' },
-      panelHead('Your agents', [FZ.AGENTS.length + ' agents, ' + coreAgents.length + ' core, keep the office moving. ', working.length ? h('span', { class: 'okt' }, working.length + ' ' + (working.length === 1 ? 'is' : 'are') + ' working now.') : null], (counts.green === FZ.AGENTS.length ? 'All ' + FZ.AGENTS.length + ' agents running. ' : counts.green + ' of ' + FZ.AGENTS.length + ' agents running. ') + coreAgents.length + ' core agents shown. Win brings work in, Run gets it done and paid, Keep brings customers back.', working.length ? [h('span', { class: 'dot green' }), ' Now: ' + working.map(short).join(', ')] : null),
+      panelHead('Your agents', [SEEN.length + ' agents, ' + coreAgents.length + ' core, keep the office moving. ', working.length ? h('span', { class: 'okt' }, working.length + ' ' + (working.length === 1 ? 'is' : 'are') + ' working now.') : null], (counts.green === SEEN.length ? 'All ' + SEEN.length + ' agents running. ' : counts.green + ' of ' + SEEN.length + ' agents running. ' + (counts.grey ? 'The rest start with your next morning run. ' : '')) + coreAgents.length + ' core agents shown. Win brings work in, Run gets it done and paid, Keep brings customers back.', working.length ? [h('span', { class: 'dot green' }), ' Now: ' + working.map(short).join(', ')] : null),
       D('dt-agents', ['growth', 'run', 'keep'].flatMap((g) => coreAgents.filter((a) => a.group === g)).map((a) => {
         const m = FZ.metricOf(a.key);
         const n = (todayRuns.find((x) => x.a.key === a.key) || { times: [] }).times.length;
@@ -698,10 +699,10 @@
         D('dt-feed', feed.slice(0, 6).map((f) => D('dt-frow', h('span', { class: 'dt-tag' }, tagOf(f.a)), h('span', { class: 'dt-ftx' }, h('b', null, f.a ? short(f.a) : 'Office'), ' › ' + f.text), h('span', { class: 'dt-ftm' }, f.at ? (Date.now() - new Date(f.at).getTime() < 5 * 60000 ? 'now' : fmt.fmtTime(f.at)) : ''))))) : (() => {
         const ag = (k) => FZ.AGENTS.find((x) => x.key === k);
         const MOCK = [
-          ['builder-engine', 'Hand off to Draft Quotes: 2 new permits near Breckenridge. One builder asked for shower glass pricing.', '5:02am'],
+          ['builder-engine', 'Hand off to Quote Jobs: 2 new projects nearby. One builder asked for pricing.', '5:02am'],
           ['quote-prep', 'Claimed both. Drafted from your price book, ready for your OK by 9am.', '5:26am'],
           ['quote-chaser', '3 quotes past Jobber reminders. Follow ups written, one waits for you above.', '5:33am'],
-          ['get-paid', 'One invoice over 60 days. Handed to Rob for a call, the rest got a friendly nudge.', '5:51am'],
+          ['get-paid', 'One invoice over 60 days. Handed to you for a call, the rest got a friendly nudge.', '5:51am'],
           ['morning-brief', 'Your brief is ready. 4 things need you, worth about $12k.', '6:17am']
         ].filter(([k]) => ag(k));
         return false && MOCK.length ? D('dt-feedwrap', h('p', { class: 'dt-eb2' }, 'Agent message board', h('span', { class: 'dt-extag' }, 'Example')), h('p', { class: 'dt-note' }, 'Example of how your agents hand work to each other.'),
@@ -723,7 +724,7 @@
     const payoff = payoffBits.length ? payoffBits.join(' and ').replace(/^m/, 'M') + ' close the gap.' : overdue > 0 ? 'Collecting what is overdue helps most.' : 'Keep the pace.';
     const goalTitle = !target ? ['Set a goal. ', h('span', { class: 'dt-hl' }, 'Every agent works toward it.')]
       : pctGoal >= 1 ? ['You are past your goal. ', h('span', { class: 'dt-hl' }, 'Keep the pace.')]
-        : !invoicedPerMonth ? ['Your goal is set. ', h('span', { class: 'dt-hl' }, payoff)]
+        : !invoicedPerMonth ? ['Your goal is set. ', h('span', { class: 'dt-hl' }, 'Your pace shows once Jobber has invoices.')]
           : pctGoal >= 0.9 ? ['Your goal is in reach. ', h('span', { class: 'dt-hl' }, payoff)]
             : pctGoal >= 0.6 ? ['You are ' + pctR + '% of the way to your goal. ', h('span', { class: 'dt-hl' }, payoff)]
               : ['You are ' + fmt.money(gap, { short: true }) + ' a month short of your goal. ', h('span', { class: 'dt-hl' }, payoff)];
@@ -761,10 +762,10 @@
     const qLeft = Math.max(0, qNeed - qSent);
     // Simple cards (Matt, Nov 7: "too much, more simple"): one number, one thin bar, one line, one button.
     const pbar = (part, label) => { const el = D('dt-pbar', h('i', { style: 'width:' + Math.max(2, Math.min(100, Math.round(part * 100))) + '%' })); el.setAttribute('role', 'img'); el.setAttribute('aria-label', label); return el; };
-    const quotesCard = card('Send more quotes', qNeed ? [h('b', null, String(qLeft)), qLeft === 1 ? ' quote to send this month' : ' quotes to send this month'] : 'On track',
+    const quotesCard = card('Send more quotes', qNeed ? [h('b', null, String(qLeft)), qLeft === 1 ? ' quote to send this month' : ' quotes to send this month'] : (invoicedPerMonth ? 'On track' : 'No history yet'),
       qNeed ? pbar(qSent / qNeed, qSent + ' of ' + qNeed + ' sent') : null,
       qNeed ? [h('b', null, qSent + ' of ' + qNeed), ' sent'] : null, null, ['Follow up quotes', '#a-quote-chaser']);
-    const jobsCard = card('Invoice more jobs', moreI > 0.5 ? [h('b', null, '+' + r1(moreI)), r1(moreI) === 1 ? ' job a month' : ' jobs a month'] : 'On track',
+    const jobsCard = card('Invoice more jobs', moreI > 0.5 ? [h('b', null, '+' + r1(moreI)), r1(moreI) === 1 ? ' job a month' : ' jobs a month'] : (invoicedPerMonth ? 'On track' : 'No history yet'),
       invoicesNeeded ? pbar(invoicesPerMonth / invoicesNeeded, r1(invoicesPerMonth) + ' of ' + r1(invoicesNeeded) + ' a month') : null,
       [h('b', null, r1(invoicesPerMonth) + ' of ' + r1(invoicesNeeded)), ' a month'], null, ['Invoice finished work', '#a-bill-it']);
     const owedCard = overdue > 0 ? card('Collect what you are owed', [h('b', null, fmt.money(overdue, { short: true })), ' overdue'],

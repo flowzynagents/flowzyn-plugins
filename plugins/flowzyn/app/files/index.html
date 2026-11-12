@@ -1378,6 +1378,18 @@
   .ag-row { padding: 16px 18px !important; }
   .ag-more { padding: 14px 18px !important; }
 }
+
+  /* Nov 11: nothing scrolls sideways on a phone. Task buttons wrap, and the four tabs share one row. */
+  .dt-need-btns { flex-wrap: wrap; }
+  @media (max-width: 480px) {
+    .apptabs { display: flex; flex-wrap: nowrap; gap: 2px; }
+    .apptabs .apptab { flex: 1 1 auto; min-width: 0; padding-left: 8px; padding-right: 8px; white-space: nowrap; font-size: 14px; }
+    .dt-need-btns .dt-btn { flex: 1 1 calc(50% - 8px); min-width: 0; }
+  }
+  @media (max-width: 620px) { .pf-rank .fz-btn.sm { grid-column: 2 / -1; justify-self: start; white-space: nowrap; } }
+  /* The second part of a merged agent page: its headline is a quiet lead line. */
+  .qj-lead { font-size: 15px; font-weight: 600; margin: 14px 0 4px; }
+  .qj-lead b { color: var(--accent); }
 </style>
 
 <div class="wrap">
@@ -1499,15 +1511,10 @@
 <script src="boards/growth-local-search-check.js"></script>
 <script src="boards/growth-lost-quote-revival.js"></script>
 <script src="boards/growth-partner-finder.js"></script>
-<script src="boards/keep-builder-keep.js"></script>
 <script src="boards/keep-come-back.js"></script>
 <script src="boards/keep-review-ask.js"></script>
-<script src="boards/keep-review-watch.js"></script>
-<script src="boards/keep-stand-behind-it.js"></script>
 <script src="boards/run-add-on-finder.js"></script>
 <script src="boards/run-bill-it.js"></script>
-<script src="boards/run-cash-in.js"></script>
-<script src="boards/run-crew-sheet.js"></script>
 <script src="boards/run-get-paid.js"></script>
 <script src="boards/run-lead-catcher.js"></script>
 <script src="boards/run-month-close.js"></script>
@@ -1523,7 +1530,6 @@
 <script src="boards/run-quote-chaser.js"></script>
 <script src="boards/run-quote-prep.js"></script>
 <script src="boards/run-replies.js"></script>
-<script src="boards/run-shop-handbook.js"></script>
 <script src="boards/run-weather-watch.js"></script>
 <script src="boards/run-week-board.js"></script>
 <script src="boards/run-yes-to-install.js"></script>

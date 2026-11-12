@@ -112,11 +112,11 @@ FZ.board('quote-prep', {
       const el = h('article', { class: 'fz-card' + (x.days > RULES.waitFlagDays ? ' flag' : ''), 'data-qg': x.r.id },
         h('div', { class: 'fz-card-top' }, h('span', { class: 'when' }, x.why + ' · ' + (x.days ? fmt.plural(x.days, 'day') + ' ago' : 'today')), amt),
         h('span', { class: 'who' }, x.who),
-        h('span', { class: 'why' }, x.ask + (place(x) ? ', ' + place(x) : '') + '. ' + (x.model ? 'Based on quote #' + x.model.quoteNumber + (x.model.client && x.model.client.name ? ' for ' + fmt.clean(x.model.client.name) : '') + ', a similar job. Or type the sizes to price it fresh.' : 'The measure is done but the sizes are not in Jobber. Type them here to price it.')),
+        h('span', { class: 'why' }, x.ask + (place(x) ? ', ' + place(x) : '') + '. ' + (x.model ? 'Based on quote #' + x.model.quoteNumber + (x.model.client && x.model.client.name ? ' for ' + fmt.clean(x.model.client.name) : '') + ', a similar job.' + (FZ.isGlass() ? ' Or type the sizes to price it fresh.' : '') : (FZ.isGlass() ? 'The measure is done but the sizes are not in Jobber. Type them here to price it.' : 'No similar past quote to model it on. Open it in Jobber to price it.'))),
         h('table', { class: 'qg-lines' },
           h('thead', null, h('tr', null, h('th', null, 'Item'), h('th', { class: 'num' }, 'Qty'), h('th', { class: 'num' }, 'Price'), h('th', { class: 'num' }, 'Total'))),
           body, h('tfoot', null, h('tr', null, h('td', { colspan: '3' }, 'Total before tax'), foot))),
-        h('div', { class: 'sa-inline' }, sizes, A.photoSizesBtn(sizes, x.ask, msg), gSel, hSel, useSizes),
+        FZ.isGlass() ? h('div', { class: 'sa-inline' }, sizes, A.photoSizesBtn(sizes, x.ask, msg), gSel, hSel, useSizes) : null,
         h('div', { class: 'fz-card-btns' }, ok, FZ.opButton({ id: id, title: 'Quote for ' + x.who, meta: x.ask + (place(x) ? ', ' + place(x) : ''), link: x.r.jobberWebUri, agent: 'quote-prep' }), handled(id, ok), x.r.jobberWebUri ? ui.extLink(x.r.jobberWebUri, 'Open in Jobber', 'fz-btn sm') : null), msg);
       paint();
       return el;
@@ -198,7 +198,7 @@ FZ.board('quote-prep', {
         ], restRows, { open: true }) }
       }));
       out.push(CSS);
-      out.push(ui.section(fmt.plural(ready.length + measured.length, 'job') + ' to quote', 'Check the items and prices, or type the sizes. Create it and it is a draft quote in Jobber for you to send.',
+      out.push(ui.section(fmt.plural(ready.length + measured.length, 'job') + ' to quote', (FZ.isGlass() ? 'Check the items and prices, or type the sizes.' : 'Check the items and prices.') + ' Create it and it is a draft quote in Jobber for you to send.',
         h('div', { class: 'fz-cards' }, [...ready, ...measured].map(card)),
         h('style', null, '.qg-lines{width:100%;table-layout:fixed;border-collapse:collapse;margin:12px 0 4px;font-size:14px;font-variant-numeric:tabular-nums}.qg-lines th{text-align:left;font-size:12px;color:var(--muted);font-weight:600;padding:6px 8px;border-bottom:1px solid var(--line)}.qg-lines td{padding:8px;border-bottom:1px solid var(--line);vertical-align:top}.qg-lines .num{text-align:right;white-space:nowrap;width:90px}.qg-lines td:first-child{overflow-wrap:anywhere}.qg-lines .d{display:block;color:var(--muted);font-size:12px}.qg-lines tfoot td{font-weight:800;border-bottom:0}@media(max-width:620px){.qg-lines{font-size:13px}.qg-lines .num{width:62px}.qg-lines th:nth-child(2),.qg-lines td:nth-child(2){width:34px}.qg-lines td,.qg-lines th{padding:6px 4px}}')));
     }

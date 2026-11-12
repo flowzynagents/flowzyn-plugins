@@ -1,11 +1,11 @@
 // Builder Outreach: builders pulling permits in the areas the shop picks, with a note from the owner.
 FZ.board('builder-engine', {
   status: 'live',
-  source: 'Permits: county permit lists, loaded nightly by Flowzyn. Builders: Jobber, live.',
+  source: 'New projects: open county permit lists where one is published, checked by your Monday run. Builders: Jobber, live.',
   async render(ctx) {
     const { ui, fmt } = ctx;
     const WINDOW = 60, PER_WEEK = 10, MATCH_CAP = 25;
-    let AREAS = 'Denver and Boulder';
+    let AREAS = FZ.town();
     const isCo = (c) => !!(c && (fmt.clean(c.companyName) || c.isCompany));
     const coName = (c) => fmt.clean(c.companyName) || fmt.clean(c.name);
     const norm = (s) => fmt.clean(s).toLowerCase().replace(/[.,&'’]/g, ' ').replace(/\b(llc|inc|incorporated|co|corp|corporation|company|ltd|the)\b/g, ' ').replace(/\s+/g, ' ').trim();
@@ -44,17 +44,17 @@ FZ.board('builder-engine', {
       list.sort((a, b) => b.won - a.won || b.quoted - a.quoted);
 
       ctx.metric('builder-engine', list.length
-        ? { value: fmt.plural(list.length, 'builder') + ' already in Jobber', detail: 'Permit list loads nightly' }
-        : { value: 'Loading new permits', detail: 'Permit list loads nightly' });
+        ? { value: fmt.plural(list.length, 'builder') + ' already in Jobber', detail: 'Checked every Monday' }
+        : { value: 'Looking for new projects', detail: 'Checked every Monday' });
       const K = FZ.kit, { h } = ui;
       const EX = [{ n: 10, label: 'Intro emails sent', w: 100 }, { n: 2, label: 'Builders replied', w: 62 }, { n: 1, label: 'Site visit booked', w: 38, hi: true }];
       const out0 = [
         ui.status(list.length
           ? ['You already quote ' + fmt.plural(list.length, 'builder') + '. ', { b: 'About ' + PER_WEEK + ' new builder intros a week' }, ' show here.']
-          : [data && data.updatedAt ? 'No new approvals near you this week. ' : 'First permits load tonight. ', { b: 'About ' + PER_WEEK + ' builder intros a week' }, ' show here.']),
-        K.how(h, 'It reads new county permits each night and writes a short intro from you to each builder not in your Jobber yet.'),
+          : [data && data.updatedAt ? 'No new approvals near you this week. ' : 'The first check runs with your Monday run. ', { b: 'About ' + PER_WEEK + ' builder intros a week' }, ' show here.']),
+        K.how(h, 'It finds builders with new projects near you each week and writes a short intro from you to each one not in your Jobber yet.'),
         K.quiet(h,
-          K.checked(h, data && data.updatedAt ? 'Permit list checked ' + fmt.fmtDay(data.updatedAt) : 'First permit list loads tonight', [
+          K.checked(h, data && data.updatedAt ? 'Permit list checked ' + fmt.fmtDay(data.updatedAt) : 'First check runs with your Monday run', [
             data && data.updatedAt ? 'No new approvals in the last ' + WINDOW + ' days for ' + AREAS : 'Areas set: ' + AREAS,
             list.length ? fmt.plural(list.length, 'builder') + ' already in your Jobber, left out of intros' : 'No builders in your Jobber yet, so every builder counts as new',
             list.length && list[0].quoted ? 'Top builder you quote: ' + K.name(list[0].name) + ', ' + fmt.money(list[0].quoted, { short: true }) + ' in 12 months' : null,
@@ -62,7 +62,7 @@ FZ.board('builder-engine', {
           ]),
           K.example(h, 'Ridge Line Builders booked a site walk', [
             h('div', { class: 'be-fun' }, EX.map((st) => h('div', { class: 'be-fstep' + (st.hi ? ' hi' : ''), style: 'width:' + st.w + '%' }, h('b', null, String(st.n)), h('span', null, st.label)))),
-            h('p', { class: 'be-ex-note' }, 'Made up for a glass shop in Breckenridge. Your real builders replace this.'),
+            h('p', { class: 'be-ex-note' }, 'Made up. Your real builders replace this.'),
             h('style', null, BE_EX_CSS)]))
       ];
       if (list.length) out0.push(ui.details(fmt.plural(list.length, 'builder') + ' you already work with', h('div', { class: 'fz-tablebox' }, ui.table([
@@ -72,7 +72,7 @@ FZ.board('builder-engine', {
         { label: 'Won', num: true, get: (g) => fmt.money(g.won) },
         { label: 'Jobber', get: (g) => g.link ? ui.extLink(g.link, 'Open') : '' }
       ], list, { open: true }))));
-      out0.push(ui.how('Each night new building permits for ' + AREAS + ' are loaded. Builders with new approvals are ranked by how much they are building.', 'Builders already in your Jobber are left out of the intros. About ' + PER_WEEK + ' short emails a week are written for your OK.', 'A builder is any Jobber client with a company name. Quoted counts every quote in the last 12 months. Won counts approved and converted quotes.'));
+      out0.push(ui.how('Each week new building permits for ' + AREAS + ' are loaded. Builders with new approvals are ranked by how much they are building.', 'Builders already in your Jobber are left out of the intros. About ' + PER_WEEK + ' short emails a week are written for your OK.', 'A builder is any Jobber client with a company name. Quoted counts every quote in the last 12 months. Won counts approved and converted quotes.'));
       return out0;
     }
 
@@ -105,7 +105,7 @@ FZ.board('builder-engine', {
     const known = builders.filter((g) => g.client);
 
     // The note follows the shop's own template, so it reads right without editing each one.
-    const DEFAULT_NOTE = 'Hello {builder} team,\n\nI saw the approval for your {project}{at}. I am {me}, owner of {business}. We do shower glass, mirrors and windows for builders around ' + FZ.town() + '.\n\nIf you have not lined up glass on that one yet, I would be glad to look at the plans and get you a number within the week.\n\n{signature}';
+    const DEFAULT_NOTE = 'Hello {builder} team,\n\nI saw the approval for your {project}{at}. I am {me}, owner of {business}. ' + FZ.w.weDo + ' for builders around ' + FZ.town() + '.\n\nIf you have not lined up our part of that job yet, I would be glad to look at the plans and get you a number within the week.\n\n{signature}';
     const template = () => (FZ.profile().builderNote || DEFAULT_NOTE);
     // "COLUMBINE HOME BUILDERS LLC" reads as "Columbine Home Builders" in a note.
     const niceName = (n) => { let x = fmt.clean(n).replace(/[,.]?\s*\b(llc|inc|incorporated|corp|corporation|co|ltd)\b\.?/gi, '').trim(); if (x === x.toUpperCase()) x = x.toLowerCase().replace(/\b([a-z])/g, (m) => m.toUpperCase()); return x; };
@@ -184,7 +184,7 @@ FZ.board('builder-engine', {
     const out = [];
 
     const { h } = ui;
-    const subjectFor = (g) => 'Glass for your ' + (fmt.clean(g.latest && g.latest.address) || 'new build');
+    const subjectFor = (g) => 'A quote for your ' + (fmt.clean(g.latest && g.latest.address) || 'new build');
 
     // Pipeline: a stage strip with counts, then every builder as a readable row.
     const pipeOut = [], notesOut = [], overOut = [];
@@ -209,7 +209,7 @@ FZ.board('builder-engine', {
     // Follow ups: sent 7+ days ago, no reply yet.
     const due = [...pipe.values()].filter((p) => p.stage === 'sent' && p.sentAt && fmt.daysSince(p.sentAt) >= 7);
     if (due.length) {
-      const followNote = (p) => 'Hello ' + p.name + ' team,\n\nJust following up on my email about glass for ' + ((p.latest && p.latest.address) || 'your new build') + '. Happy to look at plans whenever suits and get you a number within the week.\n\n' + FZ.sign();
+      const followNote = (p) => 'Hello ' + p.name + ' team,\n\nJust following up on my email about ' + ((p.latest && p.latest.address) || 'your new build') + '. Happy to look at plans whenever suits and get you a number within the week.\n\n' + FZ.sign();
       pipeOut.push(ui.section(fmt.plural(due.length, 'builder') + ' to follow up', 'Sent a week or more ago with no reply yet',
         h('div', { class: 'fz-cards' }, due.map((p) => {
           const msg = h('p', { class: 'fz-hint', role: 'status' });
@@ -217,7 +217,7 @@ FZ.board('builder-engine', {
             h('div', { class: 'fz-card-top' }, h('span', { class: 'when' }, 'Sent ' + fmt.fmtDate(p.sentAt) + ' · ' + fmt.plural(fmt.daysSince(p.sentAt), 'day') + ' ago')),
             h('span', { class: 'who' }, p.name),
             h('div', { class: 'fz-card-btns' },
-              ui.draftButton(followNote(p), 'Write follow up', { subject: 'Following up: glass for your new build' }),
+              ui.draftButton(followNote(p), 'Write follow up', { subject: 'Following up on your new build' }),
               h('button', { type: 'button', class: 'fz-btn ghost', onclick: async (ev) => { ev.currentTarget.disabled = true; if (await saveStage({ name: p.name }, 'replied', msg)) { msg.textContent = 'Moved to Replied.'; rerender(); } } }, 'They replied')),
             msg);
           return card;
@@ -324,7 +324,7 @@ FZ.board('builder-engine', {
     const lead = top6[0];
     const knownN = builders.filter((g) => g.checked && g.client).length;
     const checkedN = builders.filter((g) => g.checked).length;
-    overOut.push(K.how(h, 'It reads new county permits each night and writes a short intro from you to each builder not in your Jobber yet.'));
+    overOut.push(K.how(h, 'It finds builders with new projects near you each week and writes a short intro from you to each one not in your Jobber yet.'));
     const did = [
       { t: 'Loaded ' + fmt.plural(permits.length, 'permit') + ' for ' + AREAS, s: data.updatedAt ? 'Last load ' + fmt.fmtDay(data.updatedAt) : 'Last ' + WINDOW + ' days' },
       { t: (checkedN === builders.length ? 'Checked all ' : 'Checked the top ') + fmt.plural(checkedN, 'builder') + ' against Jobber', s: knownN ? fmt.plural(knownN, 'already works', 'already work') + ' with you, left out' : 'None of them are in your Jobber yet' },

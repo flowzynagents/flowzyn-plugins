@@ -103,10 +103,11 @@ FZ.board('lead-catcher', {
       const topic = (x) => fmt.clean(String(x.title).split(' - ')[0]).toLowerCase().replace(/^request for /, '');
       const isFix = (x) => /adjust|repair|fix|service|warranty|broken|leak|stuck/i.test(x.title);
       const street = (x) => place(x) ? fmt.clean(x.r.property.address.street1) : '';
-      const draft = (x) => 'Hi ' + fmt.firstName(x.who) + ',\n\n' +
+      const draft = (x) => FZ.tpl.body(isFix(x) ? 'repair-reply' : 'enquiry-reply', { 'first name': fmt.firstName(x.who), 'what they asked': topic(x), 'at address': street(x) ? ' at ' + street(x) : '', 'about address': street(x) ? ' about ' + street(x) : '' }, null, draft0(x));
+      const draft0 = (x) => 'Hi ' + fmt.firstName(x.who) + ',\n\n' +
         (isFix(x)
           ? 'Thanks for letting us know' + (street(x) ? ' about ' + street(x) : '') + '. Sorry something needs looking at. I can come take a look, usually within a few days. What day this week or next works for you?'
-          : 'Thanks for reaching out to ' + FZ.biz() + ' about ' + topic(x) + (street(x) ? ' at ' + street(x) : '') + '. The best next step is a quick visit so I can measure and see the space. It takes about half an hour and there is no charge. What day this week or next works for you?') +
+          : 'Thanks for reaching out to ' + FZ.biz() + ' about ' + topic(x) + (street(x) ? ' at ' + street(x) : '') + '. The best next step is a quick visit so I can take a look. It takes about half an hour. What day this week or next works for you?') +
         '\n\n' + FZ.sign();
       out.push(ui.cards(rows.map((x) => ({
         when: 'Waiting ' + waited(x) + ' · ' + LABEL[x.status],
