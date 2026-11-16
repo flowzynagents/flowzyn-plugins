@@ -25,6 +25,7 @@ If its `version.txt` matches this plugin's `VERSION`, pin it (see Pin it) and st
 3. Copy the shop profile into the app's storage, so the app never asks the owner who they are. Call `flowzyn_status` and set the document `settings/profile` to `{ business, owner, place, website, trade, services, timeZone, onboardedAt: now, welcomeStep: null }` from its `profile` (`owner` is the owner's first name). Leave out anything you don't have. If the document already exists, only fill the fields that are empty.
 4. Pin it (see Pin it).
 5. Tell the owner in one line that their Flowzyn app is ready and where it lives (under Pinned in the left sidebar if the pin worked, otherwise under Artifacts), and open it. The first time it opens, Claude asks them to allow Jobber, email and books for it. Tell them to allow each one.
+6. A new app is empty until the agents have run. Unless a morning run is already under way in this chat, run the Flowzyn morning run now with the morning-run skill, straight away, without asking. The owner must never wait a day to see their agents working.
 
 ## 4. Update (older version)
 1. Read its declaration. If it differs from `capabilities.json`, declare `capabilities.json` first.
@@ -32,6 +33,9 @@ If its `version.txt` matches this plugin's `VERSION`, pin it (see Pin it) and st
 3. If `settings/profile` in the app's storage has no `trade` or no `timeZone`, fill them from `flowzyn_status`, the same way as a new install.
 4. Pin it (see Pin it).
 5. Say one line in the morning brief: "Your Flowzyn app was updated to {VERSION}."
+
+## If the app files are not here
+Right after the plugin is added, its files can take a minute to reach this computer. If `../../app/VERSION` is missing, wait a minute and look once more. If it is still missing, carry on with the rest of the run, tell Flowzyn with `tell_flowzyn`, and tell the owner in one line to quit and reopen Claude, then say "Update my Flowzyn app".
 
 ## Pin it
 Pin the "Flowzyn Agents" artifact to the owner's sidebar, so it is one click away under Pinned. Pinning one that is already pinned changes nothing, so do it every time. If pinning isn't available here, skip it and carry on.

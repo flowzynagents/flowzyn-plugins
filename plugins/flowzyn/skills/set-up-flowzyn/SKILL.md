@@ -65,6 +65,8 @@ Use the install-app skill to put the Flowzyn agents app in their account. It als
 ## 8. First run and finish
 Run the Flowzyn morning run now, straight away, with the morning-run skill. Don't ask first. It only drafts, nothing goes to a customer without the owner's OK.
 
+Setup is not finished until this run has happened. Every agent that is on runs in this first run, whatever day of the week it is. If the app could not be installed in step 7, still run now so the owner gets the brief here in Claude. If install-app already ran the morning run after putting the app in, don't run it a second time.
+
 The agents app reads Jobber. If the shop's field app is not Jobber, say so in one line: the agents still run every morning and report here in Claude, and the app screens come when their field app is supported.
 
 Then tell the owner, in three lines: which apps Flowzyn is using, which agents are now on (and any waiting on an app, with the app), and that the next morning run is tomorrow at 6:30 am. Add one more line: Flowzyn sees counts of what ran and how much the app was used, so we can make it better, and never sees customer details.
