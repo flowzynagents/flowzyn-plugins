@@ -13,7 +13,7 @@ The artifact is one small page, the shell, given in full below. It loads one exa
 List the owner's own artifacts and look for one titled "Flowzyn Agents". If there is one, read its page.
 
 ## 2. Already current?
-If its page contains `window.FZ_SHELL = 'pinned-1.0.6'`, it is current: pin it (see Pin it) and stop. Nothing else to do.
+If its page contains `window.FZ_SHELL = 'pinned-1.0.7'`, it is current: pin it (see Pin it) and stop. Nothing else to do.
 
 ## 3. New install (no app yet)
 1. Publish the page under "The shell" below, exactly as written, as a new artifact. Title "Flowzyn Agents", icon "Grid".
@@ -55,8 +55,8 @@ Pin the "Flowzyn Agents" artifact to the owner's sidebar, so it is one click awa
 (function () {
   // Loads one exact version of the Flowzyn app code and nothing newer. The browser checks the code against
   // the fingerprint below and refuses to run it if it differs.
-  var VERSION = '1.0.6', FINGERPRINT = 'sha384-0VmHcPFoCiyvQ1CO6icX8/c7O9gaEp6oyn2WI2+/6pIbe65q2Cck7d79b/tXrFwW';
-  window.FZ_SHELL = 'pinned-1.0.6'; window.FZ_PINNED = true;
+  var VERSION = '1.0.7', FINGERPRINT = 'sha384-s3ul7tqduERpLC+WJNBQALcMKw+g9n1TNYiLn60+osLsCQh1JnUMFk83tCMEE3NH';
+  window.FZ_SHELL = 'pinned-1.0.7'; window.FZ_PINNED = true;
   var sources = ['https://cdn.jsdelivr.net/npm/flowzyn-agents-app@' + VERSION + '/bundle.js', 'https://unpkg.com/flowzyn-agents-app@' + VERSION + '/bundle.js'];
   function next(i) {
     if (window.__FZ_BUNDLE__) return;
