@@ -1,19 +1,19 @@
 ---
 name: install-app
-description: Use from Set up Flowzyn, from the morning run, or when the owner says "Update my Flowzyn app". Puts the Flowzyn agents app in the owner's own Claude, or moves it to the self updating version.
+description: Use from Set up Flowzyn, from the morning run, or when the owner says "Update my Flowzyn app". Puts the Flowzyn agents app in the owner's own Claude, or updates it to the current version.
 ---
 
 # Install or update the Flowzyn agents app
 
 The app is the shop's own screens: Overview, Tasks, Agents and Connect. It lives in the owner's own Claude account as an artifact named "Flowzyn Agents", so it reads their own Jobber with their own connector, and the morning run writes what the agents did into its storage. Flowzyn never sees their logins.
 
-The app updates itself. The artifact is one small page, the shell, given in full below. Every time it opens it loads the newest Flowzyn app code. So there are no app files to find on this computer: everything you need is in this skill. The shell only changes when this skill says so.
+The artifact is one small page, the shell, given in full below. It loads one exact version of the Flowzyn app code, named in the shell, and the browser checks that code against the fingerprint in the shell and refuses to run it if it differs. It never loads anything newer by itself: a new version only arrives when this skill carries a new shell and you publish it here. There are no app files to find on this computer, everything you need is in this skill.
 
 ## 1. Find their app
 List the owner's own artifacts and look for one titled "Flowzyn Agents". If there is one, read its page.
 
 ## 2. Already current?
-If its page contains `window.FZ_SHELL = 'shell-1'`, it is current: pin it (see Pin it) and stop. Nothing else to do.
+If its page contains `window.FZ_SHELL = 'pinned-1.0.5'`, it is current: pin it (see Pin it) and stop. Nothing else to do.
 
 ## 3. New install (no app yet)
 1. Publish the page under "The shell" below, exactly as written, as a new artifact. Title "Flowzyn Agents", icon "Grid".
@@ -24,17 +24,18 @@ If its page contains `window.FZ_SHELL = 'shell-1'`, it is current: pin it (see P
 6. A new app is empty until the agents have run. Unless a morning run is already under way in this chat, run the Flowzyn morning run now with the morning-run skill, straight away, without asking. The owner must never wait a day to see their agents working.
 
 ## 4. Update (an app without the current shell)
+This covers an older app with its code in its own files, an app on an earlier shell, and an app on a shell that loads whatever version is live. Each one moves to the shell below.
 1. Read its declaration. If it differs from the JSON under "Capabilities", declare that JSON first.
 2. Replace the artifact's page (`index.html`) with the page under "The shell", exactly as written, with the live version as the base version. Change only the page. Leave every other file the artifact has: the old script files are simply not used any more. Their saved settings, goal, templates and finished tasks stay, they live in the app's own storage, not in its files.
 3. If `settings/profile` in the app's storage has no `trade` or no `timeZone`, fill them from `flowzyn_status`, the same way as a new install.
 4. Pin it (see Pin it).
-5. Say one line: "Your Flowzyn app now updates itself."
+5. Say one line in the morning brief: "Your Flowzyn app was updated."
 
 ## Pin it
 Pin the "Flowzyn Agents" artifact to the owner's sidebar, so it is one click away under Pinned. Pinning one that is already pinned changes nothing, so do it every time. If pinning isn't available here, skip it and carry on.
 
 ## Rules
-- Publish the shell exactly as written. Never rewrite it, shorten it or add to it.
+- Publish the shell exactly as written. Never rewrite it, shorten it or add to it, and never change its version or fingerprint.
 - Never publish it anywhere but the owner's own account, and never share it.
 - If artifacts can't be published here, say the app needs a Claude plan with artifacts, tell Flowzyn with `tell_flowzyn`, and carry on with the rest of the run.
 - If a publish fails, try once more, then tell Flowzyn and carry on. Never leave the run half done because of the app.
@@ -51,32 +52,22 @@ Pin the "Flowzyn Agents" artifact to the owner's sidebar, so it is one click awa
 <div id="fz-boot">Opening your Flowzyn app</div>
 <script>
 (function () {
-  var PKG = 'flowzyn-agents-app', hosts = ['https://unpkg.com/', 'https://cdn.jsdelivr.net/npm/'];
-  window.FZ_SHELL = 'shell-1';
-  function load(src, ms, ok, fail) {
+  // Loads one exact version of the Flowzyn app code and nothing newer. The browser checks the code against
+  // the fingerprint below and refuses to run it if it differs.
+  var VERSION = '1.0.5', FINGERPRINT = 'sha384-1q0sYqyLMlBpM6ba9T2lltCbo9tjMBJ6XXmsi7yhdQXhWLq3x08Z7BsMcmdGl3tV';
+  window.FZ_SHELL = 'pinned-1.0.5'; window.FZ_PINNED = true;
+  var sources = ['https://cdn.jsdelivr.net/npm/flowzyn-agents-app@' + VERSION + '/bundle.js', 'https://unpkg.com/flowzyn-agents-app@' + VERSION + '/bundle.js'];
+  function next(i) {
+    if (window.__FZ_BUNDLE__) return;
+    if (i >= sources.length) { document.getElementById('fz-boot').textContent = 'Your Flowzyn app could not open. Close it and open it again.'; return; }
     var done = false, s = document.createElement('script');
-    var end = function (good) { if (done) return; done = true; if (good) ok(); else { s.remove(); fail(); } };
-    s.src = src; s.onload = function () { end(true); }; s.onerror = function () { end(false); };
-    setTimeout(function () { end(false); }, ms);
+    var move = function () { if (done) return; done = true; if (!window.__FZ_BUNDLE__) { s.remove(); next(i + 1); } };
+    s.src = sources[i]; s.integrity = FINGERPRINT; s.crossOrigin = 'anonymous'; s.onerror = move;
+    s.onload = function () { done = true; window.FZ_SOURCE = sources[i]; var b = document.getElementById('fz-boot'); if (b) b.remove(); };
+    setTimeout(move, 15000);
     document.body.appendChild(s);
   }
-  function started(src) { window.FZ_SOURCE = src; var b = document.getElementById('fz-boot'); if (b) b.remove(); }
-  function builtIn() {
-    if (window.__FZ_BUNDLE__) return;
-    load('bundle.js', 20000, function () { started('built in copy'); }, function () { var b = document.getElementById('fz-boot'); if (b) b.textContent = 'Your Flowzyn app could not open. Close it and open it again.'; });
-  }
-  // Step 1: ask which version is live, fresh every time. Step 2: load that exact version.
-  function tryHost(i) {
-    if (window.__FZ_BUNDLE__) return;
-    if (i >= hosts.length) return builtIn();
-    var next = function () { tryHost(i + 1); };
-    load(hosts[i] + PKG + '@live/live.js?t=' + Date.now(), 5000, function () {
-      var v = String(window.__FZ_LIVE__ || '');
-      if (!/^[0-9]+\.[0-9]+\.[0-9]+$/.test(v)) return next();
-      load(hosts[i] + PKG + '@' + v + '/bundle.js', 12000, function () { if (window.__FZ_BUNDLE__) started(hosts[i].split('/')[2]); else next(); }, next);
-    }, next);
-  }
-  tryHost(0);
+  next(0);
 })();
 </script>
 </body></html>
