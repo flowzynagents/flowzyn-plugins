@@ -9,7 +9,7 @@ Nobody is watching this run. Do it end to end and never stop to ask. Keep it sma
 
 ## 1. Start
 1. Call `flowzyn_status`. If it errors, stop and tell the owner what it says. If `systems` is not set, run the Set up Flowzyn skill instead.
-2. Use the install-app skill to check the Flowzyn app is there and current. It installs the app if the owner has none, and moves an older app to the self updating version.
+2. Use the install-app skill to check the Flowzyn app is there and current. It installs the app if the owner has none, and updates an older app to the current version.
 3. Find the owner's "Flowzyn Agents" app (list their artifacts) and note its link. Its storage is where the agents and the app meet. Read `settings/profile`, `settings/autoapprove`, `settings/templates` and list `agents`, `tasks`, `exceptions` and `runs` once, now, and reuse them for every agent.
 
 ## 2. Each agent
