@@ -13,7 +13,7 @@ The artifact is one small page, the shell, given in full below. It loads one exa
 List the owner's own artifacts and look for one titled "Flowzyn Agents". If there is one, read its page.
 
 ## 2. Already current?
-If its page contains `window.FZ_SHELL = 'pinned-1.0.5'`, it is current: pin it (see Pin it) and stop. Nothing else to do.
+If its page contains `window.FZ_SHELL = 'pinned-1.0.6'`, it is current: pin it (see Pin it) and stop. Nothing else to do.
 
 ## 3. New install (no app yet)
 1. Publish the page under "The shell" below, exactly as written, as a new artifact. Title "Flowzyn Agents", icon "Grid".
@@ -28,8 +28,9 @@ This covers an older app with its code in its own files, an app on an earlier sh
 1. Read its declaration. If it differs from the JSON under "Capabilities", declare that JSON first.
 2. Replace the artifact's page (`index.html`) with the page under "The shell", exactly as written, with the live version as the base version. Change only the page. Leave every other file the artifact has: the old script files are simply not used any more. Their saved settings, goal, templates and finished tasks stay, they live in the app's own storage, not in its files.
 3. If `settings/profile` in the app's storage has no `trade` or no `timeZone`, fill them from `flowzyn_status`, the same way as a new install.
-4. Pin it (see Pin it).
-5. Say one line in the morning brief: "Your Flowzyn app was updated."
+4. This version of the app asks Flowzyn for builders, partners and building permits itself when a page opens. If Claude asks the owner to allow the app to use Flowzyn, tell them to allow it.
+5. Pin it (see Pin it).
+6. Say one line in the morning brief: "Your Flowzyn app was updated."
 
 ## Pin it
 Pin the "Flowzyn Agents" artifact to the owner's sidebar, so it is one click away under Pinned. Pinning one that is already pinned changes nothing, so do it every time. If pinning isn't available here, skip it and carry on.
@@ -54,8 +55,8 @@ Pin the "Flowzyn Agents" artifact to the owner's sidebar, so it is one click awa
 (function () {
   // Loads one exact version of the Flowzyn app code and nothing newer. The browser checks the code against
   // the fingerprint below and refuses to run it if it differs.
-  var VERSION = '1.0.5', FINGERPRINT = 'sha384-1q0sYqyLMlBpM6ba9T2lltCbo9tjMBJ6XXmsi7yhdQXhWLq3x08Z7BsMcmdGl3tV';
-  window.FZ_SHELL = 'pinned-1.0.5'; window.FZ_PINNED = true;
+  var VERSION = '1.0.6', FINGERPRINT = 'sha384-0VmHcPFoCiyvQ1CO6icX8/c7O9gaEp6oyn2WI2+/6pIbe65q2Cck7d79b/tXrFwW';
+  window.FZ_SHELL = 'pinned-1.0.6'; window.FZ_PINNED = true;
   var sources = ['https://cdn.jsdelivr.net/npm/flowzyn-agents-app@' + VERSION + '/bundle.js', 'https://unpkg.com/flowzyn-agents-app@' + VERSION + '/bundle.js'];
   function next(i) {
     if (window.__FZ_BUNDLE__) return;
@@ -92,12 +93,13 @@ Pin the "Flowzyn Agents" artifact to the owner's sidebar, so it is one click awa
     { "path": "settings/template-lost-quote-revival", "write": "interact" },
     { "path": "campaigns", "write": "interact" },
     { "path": "bills", "write": "interact" },
-    { "path": "activity", "write": "interact" }
+    { "path": "activity", "write": "interact" },
+    { "path": "live", "write": "interact" }
   ] },
   "mcp": { "servers": [
     { "server": "Jobber", "tools": ["search_quotes", "get_quote", "search_jobs", "get_job", "search_invoices", "search_visits", "search_requests", "get_request", "search_clients", "get_client", "search_properties", "search_products_and_services", "create_request", "create_quote"] },
-    { "server": "Flowzyn", "tools": ["flowzyn_status", "get_agent_instructions", "hand_to_operator", "tell_flowzyn"] },
-    { "server": "flowzyn", "tools": ["flowzyn_status", "get_agent_instructions", "hand_to_operator", "tell_flowzyn"] },
+    { "server": "Flowzyn", "tools": ["flowzyn_status", "get_agent_instructions", "hand_to_operator", "tell_flowzyn", "find_permits", "find_prospects", "find_contacts", "find_areas", "find_shop"] },
+    { "server": "flowzyn", "tools": ["flowzyn_status", "get_agent_instructions", "hand_to_operator", "tell_flowzyn", "find_permits", "find_prospects", "find_contacts", "find_areas", "find_shop"] },
     { "server": "Intuit QuickBooks", "tools": ["company_info"] },
     { "server": "Xero", "tools": ["get_organisation_info"] },
     { "server": "Gmail", "tools": ["search_threads", "search_messages"] },
